@@ -129,11 +129,28 @@ class Settings {
                 var namecell = document.createElement('td');
                 namecell.innerText = option.name;
                 var datacell = document.createElement('td');
-                var btn = document.createElement('button');
+                var btn = document.createElement('input');
                 btn.dataset.key = option.key;
-                btn.innerText = option.value;
+                //btn.innerText = option.value;
+                switch (option.type) {
+                    case "key":
+                        //modal listening to key press, [escape] disabling keybind until new key press
+                        break;
+                    case "bool":
+                        //use checkbox with styling
+                        break;
+                    case "color":
+                        btn.type="color";
+                        btn.value = option.value;
+                        btn.addEventListener('change',function() {
+                            this.option.value = this.value;
+                            this.settings.save();
+                        }, {option: option, settings: this});
+                        break;
+                }
+                        
+                
                 datacell.appendChild(btn);
-
                 row.appendChild(namecell);
                 row.appendChild(datacell);
                 table.appendChild(row);
