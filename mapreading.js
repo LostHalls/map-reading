@@ -143,7 +143,7 @@ class Settings {
                         btn.type="color";
                         btn.value = option.value;
                         btn.addEventListener('change',e => {
-                            this[e.target.dataset.key] = e.target.value;
+                            this[e.target.dataset.key].value = e.target.value;
                             this.save();
                         });
                         break;
