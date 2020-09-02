@@ -68,17 +68,17 @@ class Settings {
     }
 
     load() {
-        //var settings = localStorage.getItem('settings');
+        var settings = localStorage.getItem('settings');
         this.defaults();
-        //if (!!settings) {
-        //    settings = JSON.parse(settings);
-        //    for (var key in settings)
-        //        this[key] = settings[key];
-        //} //else this.save();
+        if (!!settings) {
+            settings = JSON.parse(settings);
+            for (var key in settings)
+                this[key] = settings[key];
+        } else this.save();
     }
 
     save() {
-        //localStorage.setItem('settings', JSON.stringify(this));
+        localStorage.setItem('settings', JSON.stringify(this));
     }
 
     defaults() {
