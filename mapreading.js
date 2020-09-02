@@ -138,18 +138,24 @@ class Settings {
                         break;
                     case "bool":
                         //use checkbox with styling
+                        btn.type = "checkbox";
+                        btn.checked = option.value;
+                        btn.addEventListener('change', e => {
+                            this[e.target.dataset.key].value = e.target.checked;
+                            this.save();
+                        })
                         break;
                     case "color":
-                        btn.type="color";
+                        btn.type = "color";
                         btn.value = option.value;
-                        btn.addEventListener('change',e => {
+                        btn.addEventListener('change', e => {
                             this[e.target.dataset.key].value = e.target.value;
                             this.save();
                         });
                         break;
                 }
-                        
-                
+
+
                 datacell.appendChild(btn);
                 row.appendChild(namecell);
                 row.appendChild(datacell);
