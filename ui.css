@@ -1,0 +1,164 @@
+#map {
+    display: inline-block;
+    cursor: default;
+}
+
+#map:focus {
+    outline: none;
+}
+
+#map>canvas {
+    width: min(80vw, 80vh);
+}
+
+#display {
+    width: 20%;
+    height: min(80vw, 80vh);
+    background: hsl(0, 0%, 5%);
+    border-left: 1px solid hsl(0, 2%, 54%);
+    color: hsl(0, 0%, 80%);
+}
+
+#display>div {
+    margin-bottom: 16px;
+    height: 2em;
+    margin: 10% 10% 10% 16px;
+}
+
+#display>div>*:first-child {
+    float: left;
+}
+
+#display>div>*:last-child {
+    float: right;
+}
+
+main>* {
+    float: left;
+}
+
+main {
+    margin: auto;
+}
+
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font: 20px Arial;
+}
+
+@media only screen and (max-width: 1000px) {
+    #display {
+        height: 140px;
+        width: min(80vw, 80vh);
+        margin: 0;
+    }
+    #display>div {
+        margin: 4px;
+        height: 20px;
+    }
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0, 0, 0);
+    background-color: rgba(0, 0, 0, .4);
+}
+
+.modal-header {
+    padding: 2px 16px;
+    background-color: #5cb85c;
+    color: white;
+}
+
+
+/* Modal Body */
+
+.modal-body {
+    padding: 2px 16px;
+    margin: 0 auto;
+    max-height: calc(20vh - 10%);
+    overflow-y: auto;
+}
+
+
+/* Modal Footer */
+
+.modal-footer {
+    padding: 2px 16px;
+    background-color: #5cb85c;
+    color: white;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 10%;
+    padding: 20px;
+    border: 1px solid #888;
+    width: max(80%, 400px);
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    animation-name: animatetop;
+    animation-duration: 0.4s;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+@keyframes animatetop {
+    from {
+        top: -300px;
+        opacity: 0
+    }
+    to {
+        top: 0;
+        opacity: 1
+    }
+}
+
+.setting-title {
+    font-size: 1.4em;
+    font-weight: bold;
+}
+
+.setting-title td {
+    border-bottom: 2px solid green;
+}
+
+td {
+    padding-top: 18px;
+    padding-bottom: 8px;
+}
+
+td:last-child * {
+    float: right;
+}
+
+table {
+    width: 100%;
+    margin: 0;
+}
+
+button {
+    padding: 8px;
+    width: 100px;
+}

@@ -1,0 +1,109 @@
+<!doctype html>
+<html>
+
+<head>
+    <link href="ui.css" type="text/css" rel="stylesheet" />
+    <script type="text/javascript" src="mapreading.js"></script>
+    <script>
+        var lhmap = new LHMap();
+        var callback = function() {
+            document.getElementById('map').appendChild(lhmap.canvas);
+            document.getElementById('pots').appendChild(lhmap.displaypots);
+            document.getElementById('defenders').appendChild(lhmap.displaydefenders);
+            document.getElementById('ratio').appendChild(lhmap.displayratio);
+            document.querySelector("#settings-modal .modal-body").appendChild(LHMap.settings.generateTable());
+            document.getElementById('open-copy-mdl').addEventListener('click', function() {
+                var img = document.querySelector("#copy-modal img");
+                img.src = lhmap.canvas.toDataURL();
+            })
+            document.querySelectorAll(".close").forEach(e => {
+                e.addEventListener('click', function(evt) {
+                    document.querySelector(evt.target.dataset.for).style.display = "none";
+                });
+            });
+            document.querySelectorAll(".open-modal").forEach(e => {
+                e.addEventListener('click', function(evt) {
+                    document.querySelector(evt.target.dataset.for).style.display = "block";
+                });
+            });
+
+            document.addEventListener('copy', function(evt) {
+                document.getElementById('copy-modal').style.display = 'none';
+            });
+
+            window.addEventListener('click', function(evt) {
+                if (evt.target.classList.contains("modal")) {
+                    evt.target.style.display = "none";
+                }
+            });
+        };
+
+        if (
+            document.readyState === "complete" ||
+            (document.readyState !== "loading" && !document.documentElement.doScroll)
+        ) {
+            callback();
+        } else {
+            document.addEventListener("DOMContentLoaded", callback);
+        }
+    </script>
+</head>
+
+<body>
+    <main>
+        <div id="map" contenteditable="true">
+
+        </div>
+        <div id="display">
+            <div id="pots">
+                <div>Pots:</div>
+            </div>
+            <div id="defenders">
+                <div>Defenders:</div>
+            </div>
+            <div id="ratio">
+                <div>Pot Ratio:</div>
+            </div>
+
+            <div>
+                <button data-for="#settings-modal" class="open-modal" type="button">Options</button>
+                <button onclick="lhmap.setup()" type="button">New Map</button>
+            </div>
+            <div>
+                <button type="button" data-for="#copy-modal" class="open-modal" id="open-copy-mdl">Copy</button>
+            </div>
+        </div>
+    </main>
+
+    <div id="settings-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close" data-for="#settings-modal">&times;</span>
+                <h2>Settings</h2>
+            </div>
+            <div class="modal-body">
+
+            </div>
+            <div class="modal-footer"></div>
+        </div>
+    </div>
+
+    <div id="copy-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close" data-for="#copy-modal">&times;</span>
+                <h2>Copy Map</h2>
+            </div>
+
+            <div class="modal-body">
+                <img src="#" width="900" height="900" id="map-copy" />
+            </div>
+            <div class="modal-footer">
+                <i>Right click the image and select "Copy image"</i>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>
