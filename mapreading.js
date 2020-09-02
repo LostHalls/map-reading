@@ -142,10 +142,10 @@ class Settings {
                     case "color":
                         btn.type="color";
                         btn.value = option.value;
-                        btn.addEventListener('change',function() {
-                            this.settings[this.dataset.key] = this.value;
-                            this.settings.save();
-                        }, {option: option, settings: this});
+                        btn.addEventListener('change',e => {
+                            this[e.target.dataset.key] = e.target.value;
+                            this.save();
+                        });
                         break;
                 }
                         
