@@ -680,17 +680,13 @@ class LHMap {
     get potshit() {
         return this.__potshit;
     }
-
-    __global_potshit = parseInt(localStorage.getItem("potshit")) || 0;
-    __potshit = 0;
     set potshit(value) {
         var change = value - this.__potshit;
         this.__potshit = value;
         this.__global_potshit += change;
         localStorage.setItem("potshit", this.__global_potshit);
     }
-    __global_defendershit = parseInt(localStorage.getItem("defendershit")) || 0;
-    __defendershit = 0;
+
     get defendershit() {
         return this.__defendershit;
     }
@@ -702,6 +698,10 @@ class LHMap {
         localStorage.setItem("defendershit", this.__global_defendershit);
     }
     constructor() {
+        this.__global_potshit = parseInt(localStorage.getItem("potshit")) || 0;
+        this.__potshit = 0;
+        this.__global_defendershit = parseInt(localStorage.getItem("defendershit")) || 0;
+        this.__defendershit = 0;
         this.defendershit = 0;
         this.potshit = 0;
         var cvs = document.createElement("canvas");
