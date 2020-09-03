@@ -505,7 +505,6 @@ class LHMap {
 
     drawSplits(ctx, x, y, shiftx, shifty) {
         if (this.rooms[x][y].isStart) {
-            var extend = 30 * LHMap.settings.extend.value;
             //GO HERE
             //SHOW PEEK ROOKS OFF SPAWN
             if (this.start.up) {
