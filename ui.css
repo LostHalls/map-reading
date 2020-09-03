@@ -1,6 +1,15 @@
 #map {
-    display: inline-block;
     cursor: default;
+    width: 100vh;
+    height: 100vh;
+    max-width: calc(100vw - 260px);
+    max-height: calc(100vw - 260px);
+    min-height: 448px;
+    min-width: 448px;
+    margin-top: 0;
+    margin-bottom: 0;
+    touch-action: manipulation;
+    float: left;
 }
 
 #map:focus {
@@ -8,29 +17,31 @@
 }
 
 #map>canvas {
-    width: min(80vw, 80vh);
+    width: 100vh;
+    height: 100vh;
+    max-width: calc(100vw - 260px);
+    max-height: calc(100vw - 260px);
+    min-height: 448px;
+    min-width: 448px;
+    touch-action: manipulation;
 }
 
 #display {
-    width: 20%;
-    height: min(80vw, 80vh);
-    background: hsl(0, 0%, 5%);
+    float: left;
+    width: 220px;
+    height: 100vh;
+    padding-left: 19px;
+    padding-right: 19px;
+    max-height: calc(100vw - 260px);
+    background: hsl(0, 0%, 6.5%);
     border-left: 1px solid hsl(0, 2%, 54%);
     color: hsl(0, 0%, 80%);
+    min-height: 448px;
 }
 
-#display>div {
-    margin-bottom: 16px;
-    height: 2em;
-    margin: 10% 10% 10% 16px;
-}
-
-#display>div>*:first-child {
-    float: left;
-}
-
-#display>div>*:last-child {
-    float: right;
+#display input {
+    margin-left: 50px;
+    margin-top: 20px;
 }
 
 main>* {
@@ -39,6 +50,8 @@ main>* {
 
 main {
     margin: auto;
+    width: fit-content;
+    height: fit-content;
 }
 
 body {
@@ -47,17 +60,53 @@ body {
     margin: 0;
     padding: 0;
     font: 20px Arial;
+    background-color: #404040;
+    overflow-y: hidden;
+    overflow-x: hidden;
 }
 
-@media only screen and (max-width: 1000px) {
+main {}
+
+#display>div>div>div:first-child {
+    float: left;
+}
+
+#display>div>div>div:last-child {
+    float: right;
+}
+
+@media (orientation: portrait) {
     #display {
-        height: 140px;
-        width: min(80vw, 80vh);
+        height: 260px;
+        width: 100vw;
         margin: 0;
+        border-left: none;
+        border-top: 1px solid hsl(0, 2%, 54%);
+        max-width: calc(100vh - 260px);
+        display: flex;
+        justify-content: space-between;
+        padding: 0;
+        min-width: 448px;
     }
     #display>div {
         margin: 4px;
         height: 20px;
+    }
+    #map {
+        height: calc(100vw);
+        width: calc(100vw);
+        max-height: calc(100vh - 260px);
+        max-width: calc(100vh - 260px);
+    }
+    #map>canvas {
+        height: calc(100vw);
+        width: calc(100vw);
+        max-width: calc(100vh - 260px);
+        max-height: calc(100vh - 260px);
+    }
+    body {
+        overflow-x: hidden;
+        overflow-y: hidden;
     }
 }
 
@@ -72,11 +121,11 @@ body {
     overflow: auto;
     background-color: rgb(0, 0, 0);
     background-color: rgba(0, 0, 0, .4);
+    font-size: 1.4em;
 }
 
 .modal-header {
     padding: 2px 16px;
-    background-color: #5cb85c;
     color: white;
 }
 
@@ -86,8 +135,6 @@ body {
 .modal-body {
     padding: 2px 16px;
     margin: 0 auto;
-    max-height: calc(20vh - 10%);
-    overflow-y: auto;
 }
 
 
@@ -95,19 +142,30 @@ body {
 
 .modal-footer {
     padding: 2px 16px;
-    background-color: #5cb85c;
     color: white;
 }
 
+#keybind-modal .modal-footer {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+}
+
 .modal-content {
-    background-color: #fefefe;
-    margin: 10%;
+    background-color: hsl(0, 0%, 15%);
+    margin: auto;
+    margin-top: 50px;
     padding: 20px;
-    border: 1px solid #888;
+    border: 1px solid hsl(0, 0%, 20%);
     width: max(80%, 400px);
+    height: max(80%, 400px);
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     animation-name: animatetop;
     animation-duration: 0.4s;
+    overflow-y: auto;
+    color: #e8e8e8;
+    position: relative;
 }
 
 .close {
@@ -119,7 +177,7 @@ body {
 
 .close:hover,
 .close:focus {
-    color: black;
+    color: white;
     text-decoration: none;
     cursor: pointer;
 }
@@ -135,18 +193,28 @@ body {
     }
 }
 
-.setting-title {
+.setting-title td:first-child {
     font-size: 1.4em;
     font-weight: bold;
+    padding-top: 20px;
+    border-bottom: 2px solid green;
+    width: fit-content;
 }
 
-.setting-title td {
-    border-bottom: 2px solid green;
+#settings-modal .modal-content {
+    width: min(600px, 95vw);
+}
+
+#keybind-modal .modal-content {
+    width: min(440px, 95vw);
 }
 
 td {
-    padding-top: 18px;
-    padding-bottom: 8px;
+    padding: 12px;
+}
+
+tr:not(.setting-title):not(:last-child) td {
+    border-bottom: 1px solid green;
 }
 
 td:last-child * {
@@ -156,9 +224,45 @@ td:last-child * {
 table {
     width: 100%;
     margin: 0;
+    border-collapse: collapse
 }
 
-button {
+input[type="button"] {
     padding: 8px;
-    width: 100px;
+    width: 120px;
+    font-weight: bold;
+    border-radius: 0;
+    border: 1px solid hsl(0, 0%, 25%);
+    background-color: hsl(0, 0%, 30%);
+    color: #e8e8e8;
+}
+
+input[type="button"]:hover {
+    border: 1px solid hsl(0, 0%, 30%);
+    background-color: hsl(0, 0%, 40%);
+    outline: none;
+    border-radius: 0;
+}
+
+input[type="button"]:hover,
+input[type="button"]:active {
+    border: 1px solid hsl(0, 0%, 40%);
+    background-color: hsl(0, 0%, 50%);
+    outline: none;
+    border-radius: 0;
+}
+
+input[type="color"] {
+    padding: 2px;
+    width: 120px;
+    height: 35px;
+}
+
+#keybind-modal .modal-header h2::after {
+    content: attr(data-name);
+}
+
+#buttons {
+    display: inline-flex;
+    flex-direction: column;
 }

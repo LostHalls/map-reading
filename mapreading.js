@@ -54,31 +54,51 @@ class Room {
 }
 
 class Setting {
-    constructor(group, type, key, name, value) {
+    constructor(group, type, key, name, value, disabled) {
         this.group = group;
         this.name = name;
         this.value = value;
         this.type = type;
         this.key = key;
+        this.disabled = !!disabled;
     }
 }
 class Settings {
     constructor() {
         this.load();
+        Settings.__change_events = [];
     }
 
     load() {
-        var settings = localStorage.getItem('settings');
         this.defaults();
-        if (!!settings) {
-            settings = JSON.parse(settings);
-            for (var key in settings)
-                this[key] = settings[key];
-        } else this.save();
-    }
 
+        if (localStorage.getItem("settings-version") != "1.0.0") {
+            localStorage.removeItem("settings");
+            this.save();
+            localStorage.setItem("settings-version", "1.0.0");
+            Settings.settingsChanged = true;
+        } else {
+            var settings = localStorage.getItem('settings');
+            if (!!settings) {
+                settings = JSON.parse(settings);
+                for (var key in settings)
+                    this[key] = settings[key];
+            }
+        }
+    }
     save() {
         localStorage.setItem('settings', JSON.stringify(this));
+        if (Settings.__change_events)
+            for (var evt of Settings.__change_events)
+                evt.paint();
+    }
+
+    onchange(lhmap) {
+        Settings.__change_events.push(lhmap);
+    }
+
+    offchange(callback) {
+        Settings.__change_events = Settings.__change_events.filter(evt => evt == callback);
     }
 
     defaults() {
@@ -92,17 +112,16 @@ class Settings {
         this.right2 = new Setting("Keybind", "key", "right2", "Right 2", 'd');
         this.newmap = new Setting("Keybind", "key", "newmap", "Get New Map", 'n');
         this.showpots = new Setting("Keybind", "key", "showpots", "Show Pots", 'p');
-        this.showtroom = new Setting("Keybind", "key", "showtroom", "Show Treasure Room", 't');
-        this.showdefender = new Setting("Keybind", "key", "showdefender", "Show Defender", 'c');
-        this.showborders = new Setting("Keybind", "key", "showborders", "Show Borders", 'b');
+        this.showborders = new Setting("Keybind", "key", "showborders", "Show Cutoffs & Shifts", 'b');
         this.options = new Setting("Keybind", "key", "options", "Open Options", 'o');
         this.undo = new Setting("Keybind", "key", "undo", "Undo Last Action", "Backspace");
-        this.showmain = new Setting("Keybind", "key", "showmain", "Show Main Path", 'm');
-        this.togglemousepad = new Setting("Keybind", "key", "togglemousepad", "Toggle Mouse Pad", 'h');
-        this.showmousepad = new Setting("Visual", "bool", "showmousepad", "Show Mouse Pad", false);
-        this.cursor = new Setting("Visual", "color", "cursor", "Cursor Color", "purple");
-        this.highlight1 = new Setting("Visual", "color", "highlight1", "Highlight 1 (left-click)", "cyan");
-        this.highlight2 = new Setting("Visual", "color", "highlight2", "Highlight 2 (right-click)", "gold");
+        this.showmain = new Setting("Keybind", "key", "showmain", "Show Main Path", 'm', true);
+        this.togglemousepad = new Setting("Keybind", "key", "togglemousepad", "Toggle Mouse Pad", 'h', true);
+        this.showmousepad = new Setting("Visual", "bool", "showmousepad", "Show Mouse Pad", false, true);
+        this.cursor = new Setting("Visual", "color", "cursor", "Cursor Color", "#800080");
+        this.highlight1 = new Setting("Visual", "color", "highlight1", "Highlight 1 (left-click)", "#00FFFF");
+        this.highlight2 = new Setting("Visual", "color", "highlight2", "Highlight 2 (right-click)", "#FFD700");
+        this.bordercol = new Setting("Visual", "color", "bordercol", "Cutoff & Shift Color", "#1a1a1a")
     }
 
     generateTable() {
@@ -122,11 +141,17 @@ class Settings {
             var titlecell = document.createElement('td');
             titlecell.innerText = title;
             titlerow.appendChild(titlecell);
+
+            titlerow.appendChild(document.createElement('td'))
+            titlerow.appendChild(document.createElement('td'))
             table.appendChild(titlerow);
             for (var option in group) {
                 option = group[option];
+                if (option.disabled)
+                    continue;
                 var row = document.createElement('tr');
                 var namecell = document.createElement('td');
+                namecell.colSpan = 2;
                 namecell.innerText = option.name;
                 var datacell = document.createElement('td');
                 var btn = document.createElement('input');
@@ -135,6 +160,18 @@ class Settings {
                 switch (option.type) {
                     case "key":
                         //modal listening to key press, [escape] disabling keybind until new key press
+                        btn.type = "button";
+                        btn.value = option.value.toUpperCase();
+                        btn.id = "keybind-" + option.key;
+                        btn.addEventListener('click', e => {
+                            console.log(e);
+                            var modal = document.querySelector("#keybind-modal");
+                            var opt = this[e.target.dataset.key];
+                            modal.querySelector("h2 span").innerText = opt.name;
+                            modal.querySelector(".modal-body").innerText = "Current Keybind: " + opt.value;
+                            modal.dataset.key = e.target.dataset.key;
+                            modal.style.display = "block";
+                        })
                         break;
                     case "bool":
                         //use checkbox with styling
@@ -191,12 +228,6 @@ class LHMap {
             case LHMap.settings.showpots.value:
                 this.map.togglePots();
                 break;
-            case LHMap.settings.showtroom.value:
-                this.map.toggleTroom();
-                break;
-            case LHMap.settings.showdefender.value:
-                this.map.toggleDefender();
-                break;
             case LHMap.settings.showborders.value:
                 this.map.toggleBorders();
                 break;
@@ -244,6 +275,14 @@ class LHMap {
         this.setRoom(1, 0);
     }
 
+    showOptions() {
+        var modal = document.getElementById("settings-modal");
+        if (modal.style.display != "block")
+            modal.style.display = "block";
+        else
+            modal.style.display = "none";
+    }
+
     setRoom(offsetY, offsetX) {
         offsetX = offsetX || 0;
         offsetY = offsetY || 0;
@@ -265,24 +304,12 @@ class LHMap {
     }
     togglePots() {
         this.showpots = !this.showpots;
+        this.founddefender = true;
+        //if (this.defender.isSeen)
+        //    return;
 
-        if (this.defender.isSeen)
-            return;
+        //this.forceRatio();
 
-        this.forceRatio();
-    }
-
-    toggleTroom() {
-        this.showtroom = !this.showtroom;
-        if (!this.foundpots.includes(this.troom) && !this.founddefender) {
-            this.foundpots.push(troom);
-            this.potshit++;
-        }
-    }
-
-    toggleDefender() {
-        this.showdefender = !this.showdefender;
-        this.forceRatio(true, true);
     }
 
     toggleBorders() {
@@ -290,15 +317,21 @@ class LHMap {
     }
 
     toggleMainPath() {
-        //this.showmain = !this.showmain;
+        if (LHMap.debug)
+            this.showmain = !this.showmain;
     }
 
     toggleAll() {
         this.showallrooms = !this.showallrooms;
-        this.forceRatio(true);
+        this.founddefender = true;
+        //this.forceRatio(true);
     }
 
-    forceRatio(seedefender, ignorepots) {
+    /*forceRatio() {
+        if (!this.founddefender)
+        {
+
+        }
         if (!ignorepots && !this.founddefender) {
             for (var k in this.pots) {
                 var pot = this.pots[k];
@@ -316,7 +349,7 @@ class LHMap {
             this.founddefender = true;
             this.defendershit++;
         }
-    }
+    }*/
 
     /**
      * Paints to the context given. If none was given, prints to the canvas that belongs to this LHMap.
@@ -326,11 +359,23 @@ class LHMap {
 
         ctx = ctx || this.canvas.getContext('2d');
 
-        ctx.fillStyle = "hsl(0, 0%, 5%)";
+        ctx.fillStyle = "hsl(0, 0%, 6.5%)";
         ctx.fillRect(0, 0, 900, 900);
 
         var shiftx = this.rooms[8][0].isBorder ? 50 : 0;
         var shifty = this.rooms[0][8].isBorder ? 50 : 0;
+
+        if (this.showborders) {
+            ctx.fillStyle = LHMap.settings.bordercol.value;
+            if (this.start.x <= 3 - !!shiftx || this.start.x > 4) {
+                ctx.fillRect(shifty, shiftx, 900 - 2 * shifty, 100);
+                ctx.fillRect(shifty, 800 - shiftx, 900 - 2 * shifty, 100);
+            }
+            if (this.start.y <= 3 - !!shifty || this.start.y > 4) {
+                ctx.fillRect(shifty, shiftx, 100, 900 - 2 * shiftx);
+                ctx.fillRect(800 - shifty, shiftx, 100, 900 - 2 * shiftx);
+            }
+        }
 
         for (var x = 8; x >= 0; x--) {
             for (var y = 8; y >= 0; y--) {
@@ -347,7 +392,6 @@ class LHMap {
         for (var x = 8; x >= 0; x--) {
             for (var y = 8; y >= 0; y--) {
                 if (this.rooms[x][y].isSeen ||
-                    (this.rooms[x][y].isDefender && this.showdefender) ||
                     (this.showallrooms && !this.rooms[x][y].isBorder && (this.rooms[x][y].up || this.rooms[x][y].down || this.rooms[x][y].left || this.rooms[x][y].right))) {
                     ctx.fillStyle = "hsl(0, 0%, 20%)";
                     if ((this.main[x][y] || this.rooms[x][y].isDefender) && this.showmain)
@@ -412,8 +456,7 @@ class LHMap {
             }
         }
         if (this.showborders) {
-            ctx.fillStyle = "yellow";
-
+            ctx.fillStyle = LHMap.settings.bordercol.value;
             if (shifty) {
                 ctx.fillRect(0, 0, 50, 900);
                 ctx.fillRect(850, 0, 50, 900);
@@ -568,13 +611,20 @@ class LHMap {
         this.displaypots.innerText = "" + this.potshit;
         this.displaydefenders.innerText = "" + this.defendershit;
         this.displayratio.innerText = this.defendershit ? (this.potshit / this.defendershit).toFixed(2) : "No Defenders";
+
+        this.globalpots.innerText = "" + this.__global_potshit;
+        this.globaldefenders.innerText = "" + this.__global_defendershit;
+        this.globalratio.innerText = this.__global_defendershit ? (this.__global_potshit / this.__global_defendershit).toFixed(2) : "No Defenders";
     }
 
     undo() {
+        if (this.history.length == 0)
+            return;
         var room = this.history.pop();
         if (!!room) {
-            room.isSeen = false;
-            this.current = this.history[this.history.length - 1];
+            if (!this.history.includes(room) && room != this.start)
+                room.isSeen = false;
+            this.current = this.history.length == 0 ? this.start : this.history[this.history.length - 1];
         }
     }
 
@@ -626,6 +676,31 @@ class LHMap {
     context_listener(e) {
         e.preventDefault();
     }
+
+    get potshit() {
+        return this.__potshit;
+    }
+
+    __global_potshit = parseInt(localStorage.getItem("potshit")) || 0;
+    __potshit = 0;
+    set potshit(value) {
+        var change = value - this.__potshit;
+        this.__potshit = value;
+        this.__global_potshit += change;
+        localStorage.setItem("potshit", this.__global_potshit);
+    }
+    __global_defendershit = parseInt(localStorage.getItem("defendershit")) || 0;
+    __defendershit = 0;
+    get defendershit() {
+        return this.__defendershit;
+    }
+
+    set defendershit(value) {
+        var change = value - this.__defendershit;
+        this.__defendershit = value;
+        this.__global_defendershit += change;
+        localStorage.setItem("defendershit", this.__global_defendershit);
+    }
     constructor() {
         this.defendershit = 0;
         this.potshit = 0;
@@ -637,6 +712,12 @@ class LHMap {
         this.displaydefenders = document.createElement('div');
         this.displayratio = document.createElement('div');
 
+        this.globalpots = document.createElement('div');
+        this.globaldefenders = document.createElement('div');
+        this.globalratio = document.createElement('div');
+
+        LHMap.settings.onchange(this);
+
         this.setup();
 
         var _this = this;
@@ -644,8 +725,8 @@ class LHMap {
         document.addEventListener('keydown', { handleEvent: this.keyboard_listener, map: this });
         this.canvas.addEventListener('mousemove', { handleEvent: this.mousemove_listener, map: this });
         this.canvas.addEventListener('mousedown', { handleEvent: this.mousedown_listener, map: this });
-        this.canvas.addEventListener('mouseup', { handleEvent: this.mouseup_listener, map: this });
         this.canvas.addEventListener('contextmenu', { handleEvent: this.context_listener, map: this });
+        this.canvas.addEventListener('dblclick', e => { e.preventDefault() });
     }
     setup() {
         if (this.rooms) {
@@ -656,8 +737,8 @@ class LHMap {
         this.borders = [];
         this.start = this.rooms[4][4];
         this.showpots = false;
-        this.showtroom = false;
         this.showborders = false;
+        this.showcutoffs = false;
         this.showallrooms = false;
         this.history = [];
         this.foundpots = [];

@@ -11,11 +11,14 @@
             document.getElementById('pots').appendChild(lhmap.displaypots);
             document.getElementById('defenders').appendChild(lhmap.displaydefenders);
             document.getElementById('ratio').appendChild(lhmap.displayratio);
+            document.getElementById('gpots').appendChild(lhmap.globalpots);
+            document.getElementById('gdefenders').appendChild(lhmap.globaldefenders);
+            document.getElementById('gratio').appendChild(lhmap.globalratio);
             document.querySelector("#settings-modal .modal-body").appendChild(LHMap.settings.generateTable());
-            document.getElementById('open-copy-mdl').addEventListener('click', function() {
-                var img = document.querySelector("#copy-modal img");
-                img.src = lhmap.canvas.toDataURL();
-            })
+            //document.getElementById('open-copy-mdl').addEventListener('click', function() {
+            //    var img = document.querySelector("#copy-modal img");
+            //    img.src = lhmap.canvas.toDataURL();
+            //})
             document.querySelectorAll(".close").forEach(e => {
                 e.addEventListener('click', function(evt) {
                     document.querySelector(evt.target.dataset.for).style.display = "none";
@@ -36,6 +39,35 @@
                     evt.target.style.display = "none";
                 }
             });
+
+            window.addEventListener('keyup', e => {
+                var keymodal = document.getElementById("keybind-modal");
+                if (keymodal.style.display == "block") {
+                    if (e.key == "Escape")
+                        LHMap.settings[keymodal.dataset.key].value = "None";
+                    else {
+                        LHMap.settings[keymodal.dataset.key].value = e.key;
+
+                        var values = Object.values(LHMap.settings);
+                        for (var obj in values) {
+                            if (values[obj] != LHMap.settings[keymodal.dataset.key] &&
+                                values[obj].value == e.key)
+                                values[obj].value = "None";
+                        }
+                    }
+                    LHMap.settings.save();
+
+                    document.getElementById("keybind-" + keymodal.dataset.key)
+                    keymodal.style.display = "none";
+
+                    var table = document.querySelector("#settings-modal table");
+                    table.remove();
+                    document.querySelector("#settings-modal .modal-body").appendChild(LHMap.settings.generateTable());
+                }
+            })
+
+            if (Settings.settingsChanged)
+                document.getElementById("settings-changed-modal").style.display = "block";
         };
 
         if (
@@ -46,31 +78,50 @@
         } else {
             document.addEventListener("DOMContentLoaded", callback);
         }
+
+        function showImage() {
+            var win = window.open("Copy Image", "_blank");
+            win.document.write(`<iframe src="${lhmap.canvas.toDataURL('image/png')}" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>`);
+        }
     </script>
 </head>
 
 <body>
     <main>
-        <div id="map" contenteditable="true">
+        <div id="map">
 
         </div>
         <div id="display">
-            <div id="pots">
-                <div>Pots:</div>
-            </div>
-            <div id="defenders">
-                <div>Defenders:</div>
-            </div>
-            <div id="ratio">
-                <div>Pot Ratio:</div>
+            <div id="sessionstats">
+                <h3>Session Stats:</h3>
+                <div id="pots">
+                    <div>Pots:</div>
+                </div><br>
+                <div id="defenders">
+                    <div>Defenders:</div>
+                </div><br>
+                <div id="ratio">
+                    <div>Pot Ratio:</div>
+                </div>
             </div>
 
-            <div>
-                <button data-for="#settings-modal" class="open-modal" type="button">Options</button>
-                <button onclick="lhmap.setup()" type="button">New Map</button>
+            <div id="globalstats">
+                <h3>All Time Stats:</h3>
+                <div id="gpots">
+                    <div>Pots:</div>
+                </div><br>
+                <div id="gdefenders">
+                    <div>Defenders:</div>
+                </div><br>
+                <div id="gratio">
+                    <div>Pot Ratio:</div>
+                </div>
             </div>
-            <div>
-                <button type="button" data-for="#copy-modal" class="open-modal" id="open-copy-mdl">Copy</button>
+            <div id="buttons">
+                <input type="button" data-for="#settings-modal" class="open-modal" type="button" value="Options" />
+                <input type="button" onclick="lhmap.setup()" type="button" value="New Map" />
+                <!--<button type="button" data-for="#copy-modal" class="open-modal" id="open-copy-mdl">Copy</button>-->
+                <input type="button" onclick="showImage()" value="Copy" />
             </div>
         </div>
     </main>
@@ -104,6 +155,28 @@
         </div>
     </div>
 
+    <div id="keybind-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close" data-for="#keybind-modal">&times;</span>
+                <h2>Change Keybind For: <span></span></h2>
+            </div>
+            <div class="modal-body"></div>
+            <div class="modal-footer">Enter the key you want to change the keybind to. <span id="escape-id">Escape</span> will disable the keybind.</div>
+        </div>
+    </div>
+    <div id="settings-changed-modal" class="modal">
+        <div class="modal-content">
+            <div class="Modal-header">
+                <span class="close" data-for="#settings-changed-modal">&times;</span>
+                <h2>Settings Version Changed</h2>
+            </div>
+            <div class="modal-body">
+                This is either your first time running this program, or an update requires the reset of settings. If you had any personalized settings, you will need to set them again. Sorry for the inconvenience. This does not affect your life-time pots & defenders
+                hit.
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>
