@@ -121,7 +121,7 @@ class Settings {
         this.cursor = new Setting("Visual", "color", "cursor", "Cursor Color", "#800080");
         this.highlight1 = new Setting("Visual", "color", "highlight1", "Highlight 1 (left-click)", "#00FFFF");
         this.highlight2 = new Setting("Visual", "color", "highlight2", "Highlight 2 (right-click)", "#FFD700");
-        this.bordercol = new Setting("Visual", "color", "bordercol", "Cutoff & Shift Color", "#1a1a1a")
+        this.bordercol = new Setting("Visual", "color", "bordercol", "Cutoff & Shift Color", "#1a1a1a");
     }
 
     generateTable() {
@@ -190,6 +190,15 @@ class Settings {
                             this.save();
                         });
                         break;
+                    case "percent":
+                        btn.type = "range";
+                        btn.min = 0;
+                        btn.max = 100;
+                        btn.value = option.value * 100;
+                        btn.addEventListener('input', e => {
+                            this[e.target.dataset.key].value = e.target.value / 100;
+                            this.save();
+                        });
                 }
 
 
@@ -389,6 +398,8 @@ class LHMap {
 
         this.drawSplits(ctx, this.start.x, this.start.y, shiftx, shifty);
 
+        var extend = 30;
+
         for (var x = 8; x >= 0; x--) {
             for (var y = 8; y >= 0; y--) {
                 if (this.rooms[x][y].isSeen ||
@@ -404,34 +415,43 @@ class LHMap {
                         ctx.fillStyle = "hsl(0, 0%, 20%)";
                         if ((this.main[x][y] || this.rooms[x][y].isDefender) && this.showmain && (this.main[x - 1][y] || this.rooms[x - 1][y].isDefender))
                             ctx.fillStyle = "yellow";
-                        ctx.fillRect(100 * y + (33 + shifty), 100 * x + shiftx, 34, 15);
+
+                        var dist = extend;
+
+                        ctx.fillRect(100 * y + (33 + shifty), 100 * x + shiftx + (15 - dist), 34, dist);
                         ctx.fillStyle = "#404040";
-                        ctx.fillRect(100 * y + (38 + shifty), 100 * x + shiftx, 24, 20);
+                        ctx.fillRect(100 * y + (38 + shifty), 100 * x + shiftx + (15 - dist), 24, dist + 5);
                     }
                     if (this.rooms[x][y].down) {
                         ctx.fillStyle = "hsl(0, 0%, 20%)";
                         if ((this.main[x][y] || this.rooms[x][y].isDefender) && this.showmain && (this.main[x + 1][y] || this.rooms[x + 1][y].isDefender))
                             ctx.fillStyle = "yellow";
-                        ctx.fillRect(100 * y + (33 + shifty), 100 * x + (85 + shiftx), 34, 15);
+                        var dist = extend;
+
+                        ctx.fillRect(100 * y + (33 + shifty), 100 * x + (85 + shiftx), 34, dist);
                         ctx.fillStyle = "#404040";
-                        ctx.fillRect(100 * y + (38 + shifty), 100 * x + (80 + shiftx), 24, 20);
+                        ctx.fillRect(100 * y + (38 + shifty), 100 * x + (80 + shiftx), 24, dist + 5);
 
                     }
                     if (this.rooms[x][y].left) {
                         ctx.fillStyle = "hsl(0, 0%, 20%)";
                         if ((this.main[x][y] || this.rooms[x][y].isDefender) && this.showmain && (this.main[x][y - 1] || this.rooms[x][y - 1].isDefender))
                             ctx.fillStyle = "yellow";
-                        ctx.fillRect(100 * y + shifty, 100 * x + (33 + shiftx), 15, 34);
+                        var dist = extend;
+
+                        ctx.fillRect(100 * y + shifty + (15 - dist), 100 * x + (33 + shiftx), dist, 34);
                         ctx.fillStyle = "#404040";
-                        ctx.fillRect(100 * y + shifty, 100 * x + (38 + shiftx), 20, 24);
+                        ctx.fillRect(100 * y + shifty + (15 - dist), 100 * x + (38 + shiftx), dist + 5, 24);
                     }
                     if (this.rooms[x][y].right) {
                         ctx.fillStyle = "hsl(0, 0%, 20%)";
                         if ((this.main[x][y] || this.rooms[x][y].isDefender) && this.showmain && (this.main[x][y + 1] || this.rooms[x][y + 1].isDefender))
                             ctx.fillStyle = "yellow";
-                        ctx.fillRect(100 * y + (85 + shifty), 100 * x + (33 + shiftx), 15, 34);
+
+                        dist = extend;
+                        ctx.fillRect(100 * y + (85 + shifty), 100 * x + (33 + shiftx), dist, 34);
                         ctx.fillStyle = "#404040";
-                        ctx.fillRect(100 * y + (80 + shifty), 100 * x + (38 + shiftx), 20, 24);
+                        ctx.fillRect(100 * y + (80 + shifty), 100 * x + (38 + shiftx), dist + 5, 24);
                     }
                     var img = false;
                     if (this.rooms[x][y].isDefender) {
@@ -485,6 +505,7 @@ class LHMap {
 
     drawSplits(ctx, x, y, shiftx, shifty) {
         if (this.rooms[x][y].isStart) {
+            var extend = 30 * LHMap.settings.extend.value;
             //GO HERE
             //SHOW PEEK ROOKS OFF SPAWN
             if (this.start.up) {
@@ -507,15 +528,15 @@ class LHMap {
                 ctx.fillRect(100 * py + (38 + shifty), 100 * px + (80 + shiftx), 24, 20);
                 if (peeking.left) {
                     ctx.fillStyle = "hsl(0, 0%, 20%)";
-                    ctx.fillRect(100 * py + shifty, 100 * px + (50 + shiftx), 15, 17);
+                    ctx.fillRect(100 * py - 15 + shifty, 100 * px + (50 + shiftx), 30, 17);
                     ctx.fillStyle = "#404040";
-                    ctx.fillRect(100 * py + shifty, 100 * px + (50 + shiftx), 20, 12);
+                    ctx.fillRect(100 * py - 15 + shifty, 100 * px + (50 + shiftx), 35, 12);
                 }
                 if (peeking.right) {
                     ctx.fillStyle = "hsl(0, 0%, 20%)";
-                    ctx.fillRect(100 * py + (85 + shifty), 100 * px + (50 + shiftx), 15, 17);
+                    ctx.fillRect(100 * py + (85 + shifty), 100 * px + (50 + shiftx), 30, 17);
                     ctx.fillStyle = "#404040";
-                    ctx.fillRect(100 * py + (80 + shifty), 100 * px + (50 + shiftx), 20, 12);
+                    ctx.fillRect(100 * py + (80 + shifty), 100 * px + (50 + shiftx), 35, 12);
                 }
 
             }
@@ -536,15 +557,15 @@ class LHMap {
 
                 if (peeking.left) {
                     ctx.fillStyle = "hsl(0, 0%, 20%)";
-                    ctx.fillRect(100 * py + shifty, 100 * px + (33 + shiftx), 15, 17);
+                    ctx.fillRect(100 * py - 15 + shifty, 100 * px + (33 + shiftx), 30, 17);
                     ctx.fillStyle = "#404040";
-                    ctx.fillRect(100 * py + shifty, 100 * px + (38 + shiftx), 20, 12);
+                    ctx.fillRect(100 * py - 15 + shifty, 100 * px + (38 + shiftx), 35, 12);
                 }
                 if (peeking.right) {
                     ctx.fillStyle = "hsl(0, 0%, 20%)";
-                    ctx.fillRect(100 * py + (85 + shifty), 100 * px + (33 + shiftx), 15, 17);
+                    ctx.fillRect(100 * py + (85 + shifty), 100 * px + (33 + shiftx), 30, 17);
                     ctx.fillStyle = "#404040";
-                    ctx.fillRect(100 * py + (80 + shifty), 100 * px + (38 + shiftx), 20, 12);
+                    ctx.fillRect(100 * py + (80 + shifty), 100 * px + (38 + shiftx), 35, 12);
                 }
             }
             if (this.start.left) {
@@ -564,16 +585,16 @@ class LHMap {
 
                 if (peeking.up) {
                     ctx.fillStyle = "hsl(0, 0%, 20%)";
-                    ctx.fillRect(100 * py + (50 + shifty), 100 * px + (shiftx), 17, 15);
+                    ctx.fillRect(100 * py + (50 + shifty), 100 * px - 15 + shiftx, 17, 30);
                     ctx.fillStyle = "#404040";
-                    ctx.fillRect(100 * py + (50 + shifty), 100 * px + (shiftx), 12, 20);
+                    ctx.fillRect(100 * py + (50 + shifty), 100 * px - 15 + shiftx, 12, 35);
                 }
 
                 if (peeking.down) {
                     ctx.fillStyle = "hsl(0, 0%, 20%)";
-                    ctx.fillRect(100 * py + (50 + shifty), 100 * px + (85 + shiftx), 17, 15);
+                    ctx.fillRect(100 * py + (50 + shifty), 100 * px + (85 + shiftx), 17, 30);
                     ctx.fillStyle = "#404040";
-                    ctx.fillRect(100 * py + (50 + shifty), 100 * px + (80 + shiftx), 12, 20);
+                    ctx.fillRect(100 * py + (50 + shifty), 100 * px + (80 + shiftx), 12, 35);
                 }
             }
             if (this.start.right) {
@@ -592,16 +613,16 @@ class LHMap {
                 ctx.fillRect(100 * py + shifty, 100 * px + (38 + shiftx), 20, 24);
                 if (peeking.up) {
                     ctx.fillStyle = "hsl(0, 0%, 20%)";
-                    ctx.fillRect(100 * py + (33 + shifty), 100 * px + (shiftx), 17, 15);
+                    ctx.fillRect(100 * py + (33 + shifty), 100 * px - 15 + (shiftx), 17, 30);
                     ctx.fillStyle = "#404040";
-                    ctx.fillRect(100 * py + (38 + shifty), 100 * px + (shiftx), 12, 20);
+                    ctx.fillRect(100 * py + (38 + shifty), 100 * px - 15 + (shiftx), 12, 35);
                 }
 
                 if (peeking.down) {
                     ctx.fillStyle = "hsl(0, 0%, 20%)";
-                    ctx.fillRect(100 * py + (33 + shifty), 100 * px + (85 + shiftx), 17, 15);
+                    ctx.fillRect(100 * py + (33 + shifty), 100 * px + (85 + shiftx), 17, 30);
                     ctx.fillStyle = "#404040";
-                    ctx.fillRect(100 * py + (38 + shifty), 100 * px + (80 + shiftx), 12, 20);
+                    ctx.fillRect(100 * py + (38 + shifty), 100 * px + (80 + shiftx), 12, 35);
                 }
             }
         }
@@ -821,7 +842,6 @@ class LHMap {
                     pre = true;
                     output += rooms[i][j].value;
                 }
-
             }
         }
         var output2 = "";
