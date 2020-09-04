@@ -15,7 +15,7 @@ function checkVisible(elm) {
 
 var lhmap = new LHMap();
 var callback = function() {
-    $('html, body').scrollTop(1);
+    $('html, body').scrollTop($(document).height());
 
     var dp = document.getElementsByClassName("d-pad")[0];
     dp.style.left = LHMap.settings.mousepadposition.value.left + "px";
@@ -140,7 +140,7 @@ var callback = function() {
         }
     }
     window.addEventListener("orientationchange", e => {
-        $('html, body').scrollTop(1);
+        $('html, body').scrollTop($(document).height());
 
         if (e.target.screen.orientation.angle) {
             offset_center = { x: 100, y: 100 };
