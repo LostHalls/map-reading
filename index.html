@@ -3,10 +3,15 @@
 
 <head>
     <link href="ui.css" type="text/css" rel="stylesheet" />
+    <link href="dpad.css" type="text/css" rel="stylesheet" />
     <script type="text/javascript" src="mapreading.js"></script>
     <script>
         var lhmap = new LHMap();
         var callback = function() {
+            var dp = document.getElementsByClassName("d-pad")[0];
+            dp.style.left = LHMap.settings.mousepadposition.value.left + "px";
+            dp.style.top = LHMap.settings.mousepadposition.value.top + "px";
+            dp.style.display = LHMap.settings.showmousepad.value ? "block" : "none";
             document.getElementById('map').appendChild(lhmap.canvas);
             document.getElementById('pots').appendChild(lhmap.displaypots);
             document.getElementById('defenders').appendChild(lhmap.displaydefenders);
@@ -64,7 +69,36 @@
                     table.remove();
                     document.querySelector("#settings-modal .modal-body").appendChild(LHMap.settings.generateTable());
                 }
-            })
+            });
+
+            document.getElementsByClassName('d-pad')[0].addEventListener('dragstart', e => {
+                var mid = document.querySelector(".d-pad .center");
+                if (e.target.querySelector(":hover") !== mid) {
+                    e.preventDefault();
+                    return false;
+                }
+                var style = window.getComputedStyle(e.target, null);
+                e.dataTransfer.setData("text/plain", (parseInt(style.getPropertyValue("left"), 10) - e.clientX) + "," +
+                    (parseInt(style.getPropertyValue("top"), 10) - e.clientY));
+            }, false);
+            window.addEventListener('dragover', e => {
+                e.preventDefault();
+                return false;
+            }, false);
+            window.addEventListener('drop', e => {
+                var offset = e.dataTransfer.getData("text/plain").split(',');
+                var dpad = document.getElementsByClassName("d-pad")[0];
+                dpad.style.left = e.clientX + parseInt(offset[0], 10) + 'px';
+                dpad.style.top = e.clientY + parseInt(offset[1], 10) + 'px';
+
+                LHMap.settings.mousepadposition.value.top = e.clientY + parseInt(offset[1], 10);
+                LHMap.settings.mousepadposition.value.left = e.clientX + parseInt(offset[0], 10);
+                LHMap.settings.save();
+
+                e.preventDefault();
+                return false;
+            }, false);
+
 
             if (Settings.settingsChanged)
                 document.getElementById("settings-changed-modal").style.display = "block";
@@ -123,6 +157,13 @@
                 <!--<button type="button" data-for="#copy-modal" class="open-modal" id="open-copy-mdl">Copy</button>-->
                 <input type="button" onclick="showImage()" value="Copy" />
             </div>
+            <div class="d-pad" draggable="true">
+                <a class="up arrow" onclick="lhmap.onUp(); lhmap.paint()"></a>
+                <a class="right arrow" onclick="lhmap.onRight(); lhmap.paint()"></a>
+                <a class="down arrow" onclick="lhmap.onDown(); lhmap.paint()"></a>
+                <a class="left arrow" onclick="lhmap.onLeft(); lhmap.paint()"></a>
+                <a class="center"></a>
+            </div>
         </div>
     </main>
 
@@ -177,6 +218,7 @@
             </div>
         </div>
     </div>
+
 </body>
 
 </html>

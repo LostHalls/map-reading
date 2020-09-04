@@ -217,6 +217,10 @@ tr:not(.setting-title):not(:last-child) td {
     border-bottom: 1px solid green;
 }
 
+td:last-child {
+    width: 120px;
+}
+
 td:last-child * {
     float: right;
 }
@@ -235,6 +239,7 @@ input[type="button"] {
     border: 1px solid hsl(0, 0%, 25%);
     background-color: hsl(0, 0%, 30%);
     color: #e8e8e8;
+    outline: none;
 }
 
 input[type="button"]:hover {
@@ -258,10 +263,21 @@ input[type="color"] {
     height: 35px;
 }
 
+#settings-modal input[type="checkbox"] {
+    float: none;
+    margin-left: 50%;
+    transform: translate(-50%);
+    width: 18px;
+    height: 18px;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+
+}
 #keybind-modal .modal-header h2::after {
     content: attr(data-name);
 }
-
 #buttons {
     display: inline-flex;
     flex-direction: column;

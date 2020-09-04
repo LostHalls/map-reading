@@ -113,11 +113,13 @@ class Settings {
         this.newmap = new Setting("Keybind", "key", "newmap", "Get New Map", 'n');
         this.showpots = new Setting("Keybind", "key", "showpots", "Show Pots", 'p');
         this.showborders = new Setting("Keybind", "key", "showborders", "Show Cutoffs & Shifts", 'b');
+        this.showallrooms = new Setting("Keybind", "key", "showallrooms", "Show All Rooms", 'i');
         this.options = new Setting("Keybind", "key", "options", "Open Options", 'o');
         this.undo = new Setting("Keybind", "key", "undo", "Undo Last Action", "Backspace");
         this.showmain = new Setting("Keybind", "key", "showmain", "Show Main Path", 'm', true);
-        this.togglemousepad = new Setting("Keybind", "key", "togglemousepad", "Toggle Mouse Pad", 'h', true);
-        this.showmousepad = new Setting("Visual", "bool", "showmousepad", "Show Mouse Pad", false, true);
+        this.togglemousepad = new Setting("Keybind", "key", "togglemousepad", "Toggle Mouse Pad", 'h');
+        this.showmousepad = new Setting("Visual", "bool", "showmousepad", "Show Mouse Pad", false);
+        this.mousepadposition = new Setting("Visual", "position", "mousepadposition", "Mouse Pad Position", { top: 100, left: 100 }, true);
         this.cursor = new Setting("Visual", "color", "cursor", "Cursor Color", "#800080");
         this.highlight1 = new Setting("Visual", "color", "highlight1", "Highlight 1 (left-click)", "#00FFFF");
         this.highlight2 = new Setting("Visual", "color", "highlight2", "Highlight 2 (right-click)", "#FFD700");
@@ -164,7 +166,6 @@ class Settings {
                         btn.value = option.value.toUpperCase();
                         btn.id = "keybind-" + option.key;
                         btn.addEventListener('click', e => {
-                            console.log(e);
                             var modal = document.querySelector("#keybind-modal");
                             var opt = this[e.target.dataset.key];
                             modal.querySelector("h2 span").innerText = opt.name;
@@ -179,6 +180,9 @@ class Settings {
                         btn.checked = option.value;
                         btn.addEventListener('change', e => {
                             this[e.target.dataset.key].value = e.target.checked;
+                            if (e.target.dataset.key == "showmousepad") {
+                                document.getElementsByClassName("d-pad")[0].style.display = e.target.checked ? "block" : "none";
+                            }
                             this.save();
                         })
                         break;
@@ -214,6 +218,8 @@ class Settings {
 
 class LHMap {
     keyboard_listener(e) {
+        if (document.querySelector("#settings-modal").style.display == "block")
+            return;
         switch (e.key) {
             case LHMap.settings.up1.value:
             case LHMap.settings.up2.value:
@@ -249,8 +255,14 @@ class LHMap {
             case LHMap.settings.showmain.value:
                 this.map.toggleMainPath();
                 break;
-            case 'i':
+            case LHMap.settings.showallrooms.value:
                 this.map.toggleAll();
+                break;
+            case LHMap.settings.togglemousepad.value:
+                LHMap.settings.showmousepad.value = !LHMap.settings.showmousepad.value;
+                document.getElementsByClassName("d-pad")[0].style.display = LHMap.settings.showmousepad.value ? "block" : "none";
+                document.querySelector("#settings-modal input[type=checkbox][data-key=showmousepad]").checked = LHMap.settings.showmousepad.value;
+                LHMap.settings.save();
                 break;
         }
         this.map.paint();
