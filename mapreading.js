@@ -72,10 +72,10 @@ class Settings {
     load() {
         this.defaults();
 
-        if (localStorage.getItem("settings-version") != "1.0.0") {
+        if (localStorage.getItem("settings-version") != "1.1") {
             localStorage.removeItem("settings");
             this.save();
-            localStorage.setItem("settings-version", "1.0.0");
+            localStorage.setItem("settings-version", "1.1");
             Settings.settingsChanged = true;
         } else {
             var settings = localStorage.getItem('settings');
