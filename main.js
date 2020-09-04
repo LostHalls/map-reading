@@ -74,6 +74,8 @@ var callback = function() {
         e.dataTransfer.setData("text/plain", (parseInt(style.getPropertyValue("left"), 10) - e.clientX) + "," +
             (parseInt(style.getPropertyValue("top"), 10) - e.clientY));
     }, false);
+
+    var startpos = { x: 0, y: 0 }
     window.addEventListener('drop', e => {
         var offset = e.dataTransfer.getData("text/plain").split(',');
         var dpad = document.getElementsByClassName("d-pad")[0];
@@ -98,7 +100,8 @@ var callback = function() {
             ignore_touch = false;
             document.getElementsByClassName('d-pad')[0].classList.add('moving');
             setdpadpos(e);
-
+            startpos.x = e.changedTouches[0].pageX;
+            startpos.y = e.changedTouches[0].pageY;
         }
     }, false);
     window.addEventListener('touchmove', e => {
@@ -127,7 +130,11 @@ var callback = function() {
             e.preventDefault();
             return false;
         }
-
+        if (e.path[0] == document.querySelector(".d-pad .center")) {
+            if (startpos.x == e.changedTouches[0].pageX &&
+                startpos.y == e.changedTouches[0].pageY)
+                lhmap.setup();
+        }
     }, false);
 
     window.addEventListener('dragover', e => {
