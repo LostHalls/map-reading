@@ -758,7 +758,11 @@ class LHMap {
         this.canvas.addEventListener('mousemove', { handleEvent: this.mousemove_listener, map: this });
         this.canvas.addEventListener('mousedown', { handleEvent: this.mousedown_listener, map: this });
         this.canvas.addEventListener('contextmenu', { handleEvent: this.context_listener, map: this });
-        this.canvas.addEventListener('dblclick', e => { e.preventDefault() });
+        this.canvas.addEventListener('dblclick', e => {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        });
     }
     setup() {
         if (this.rooms) {

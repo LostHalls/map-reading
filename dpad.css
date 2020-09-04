@@ -2,12 +2,13 @@
     position: fixed;
     width: 200px;
     height: 200px;
+    display: block;
 }
 
 .d-pad .center {
     position: absolute;
-    width: 70px;
-    height: 70px;
+    width: 120px;
+    height: 120px;
     left: 50%;
     top: 50%;
     border-radius: 50%;
@@ -17,25 +18,25 @@
 }
 
 .d-pad .center:hover,
-.d-pad .center:active {
+.d-pad .center {
     background-color: rgba(255, 255, 255, .5);
 }
 
 .d-pad .arrow {
-    width: 100px;
-    height: 100px;
+    width: 150px;
+    height: 150px;
     position: absolute;
     overflow: hidden;
 }
 
 .d-pad .arrow::before {
     position: absolute;
-    padding: 30px;
-    width: calc(100% - 90px - 1em);
+    padding: 50px;
+    width: calc(100% - 150px - 1em);
     box-shadow: 0 0 0 300px rgba(255, 255, 255, 0.075);
     content: '';
     z-index: -1;
-    margin: -30px;
+    margin: -50px;
     border-radius: 50%;
 }
 
@@ -54,7 +55,7 @@
 }
 
 .d-pad .up.arrow::after {
-    transform: translate(50%, 50%);
+    transform: translate(75%, 75%);
 }
 
 .d-pad .up.arrow::before {
@@ -74,7 +75,7 @@
 }
 
 .d-pad .right.arrow::after {
-    transform: translate(100%, 50%);
+    transform: translate(200%, 75%);
 }
 
 .d-pad .left {
@@ -89,7 +90,7 @@
 }
 
 .d-pad .left.arrow::after {
-    transform: translate(50%, 100%);
+    transform: translate(75%, 200%);
 }
 
 .d-pad .down {
@@ -99,7 +100,7 @@
 }
 
 .d-pad .down.arrow::after {
-    transform: translate(100%, 100%);
+    transform: translate(200%, 200%);
 }
 
 .d-pad * {
@@ -110,18 +111,18 @@
     border-color: rgba(255, 255, 255, .3);
 }
 
-.d-pad *:hover::before {
-    box-shadow: 0 0 0 300px rgba(255, 255, 255, 0.25);
-}
-
-.d-pad *:hover::after {
-    background-color: rgba(255, 255, 255, .4);
-}
-
 .d-pad *:active::before {
     box-shadow: 0 0 0 300px rgba(255, 255, 255, 0.45);
 }
 
 .d-pad *:active::after {
     background-color: rgba(255, 255, 255, .6);
+}
+
+.d-pad.moving * {
+    border-color: rgba(255, 255, 255, .8) !important;
+}
+
+.d-pad.moving *::after {
+    background-color: rgba(255, 255, 255, .8);
 }
