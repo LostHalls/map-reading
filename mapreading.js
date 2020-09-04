@@ -117,10 +117,10 @@ class Settings {
         this.options = new Setting("Keybind", "key", "options", "Open Options", 'o');
         this.undo = new Setting("Keybind", "key", "undo", "Undo Last Action", "Backspace");
         this.showmain = new Setting("Keybind", "key", "showmain", "Show Main Path", 'm', true);
-        this.togglemousepad = new Setting("Keybind", "key", "togglemousepad", "Toggle Mouse Pad", 'h');
+        this.togglemousepad = new Setting("Keybind", "key", "togglemousepad", "Toggle D-Pad", 'h');
         this.toggledpadcenterproc = new Setting("Keybind", "bool", "toggledpadcenterproc", "Toggle D-Pad Center Changing Map", true)
-        this.showmousepad = new Setting("Visual", "bool", "showmousepad", "Show Mouse Pad", false);
-        this.mousepadposition = new Setting("Visual", "position", "mousepadposition", "Mouse Pad Position", { top: 100, left: 100 }, true);
+        this.showmousepad = new Setting("Visual", "bool", "showmousepad", "Show D-Pad", false);
+        this.mousepadposition = new Setting("Visual", "position", "mousepadposition", "D-Pad Position", { top: 100, left: 100 }, true);
         this.cursor = new Setting("Visual", "color", "cursor", "Cursor Color", "#800080");
         this.highlight1 = new Setting("Visual", "color", "highlight1", "Highlight 1 (left-click)", "#00FFFF");
         this.highlight2 = new Setting("Visual", "color", "highlight2", "Highlight 2 (right-click)", "#FFD700");
