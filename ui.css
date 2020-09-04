@@ -1,7 +1,5 @@
 html,
-body {
-    touch-action: none;
-}
+body {}
 
 .modal,
 .modal * {
