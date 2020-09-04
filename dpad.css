@@ -6,8 +6,8 @@
 
 .d-pad .center {
     position: absolute;
-    width: 40px;
-    height: 40px;
+    width: 70px;
+    height: 70px;
     left: 50%;
     top: 50%;
     border-radius: 50%;
@@ -22,27 +22,27 @@
 }
 
 .d-pad .arrow {
-    width: 60px;
-    height: 60px;
+    width: 100px;
+    height: 100px;
     position: absolute;
     overflow: hidden;
 }
 
 .d-pad .arrow::before {
     position: absolute;
-    padding: 20px;
-    width: calc(100% - 40px - 1em);
+    padding: 30px;
+    width: calc(100% - 90px - 1em);
     box-shadow: 0 0 0 300px rgba(255, 255, 255, 0.075);
     content: '';
     z-index: -1;
-    margin: -20px;
+    margin: -30px;
     border-radius: 50%;
 }
 
 .d-pad .arrow::after {
     content: ' ';
-    width: 20px;
-    height: 20px;
+    width: 40px;
+    height: 40px;
     background-color: rgba(255, 255, 255, .2);
     position: absolute;
 }
@@ -74,7 +74,7 @@
 }
 
 .d-pad .right.arrow::after {
-    transform: translate(150%, 50%);
+    transform: translate(100%, 50%);
 }
 
 .d-pad .left {
@@ -89,7 +89,7 @@
 }
 
 .d-pad .left.arrow::after {
-    transform: translate(50%, 150%);
+    transform: translate(50%, 100%);
 }
 
 .d-pad .down {
@@ -99,7 +99,7 @@
 }
 
 .d-pad .down.arrow::after {
-    transform: translate(150%, 150%);
+    transform: translate(100%, 100%);
 }
 
 .d-pad * {
