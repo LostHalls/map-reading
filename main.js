@@ -119,6 +119,8 @@ var callback = function() {
             //setdpadpos(e);
             startpos.x = e.changedTouches[0].pageX;
             startpos.y = e.changedTouches[0].pageY;
+            e.preventDefault();
+            e.stopPropagation();
         }
     }, false);
     window.addEventListener('touchmove', e => {
