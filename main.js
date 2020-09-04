@@ -15,6 +15,8 @@ function checkVisible(elm) {
 
 var lhmap = new LHMap();
 var callback = function() {
+    $('html, body').scrollTop(1);
+
     var dp = document.getElementsByClassName("d-pad")[0];
     dp.style.left = LHMap.settings.mousepadposition.value.left + "px";
     dp.style.top = LHMap.settings.mousepadposition.value.top + "px";
@@ -123,6 +125,7 @@ var callback = function() {
         if (ignore_touch)
             return;
         setdpadpos(e);
+        e.preventDefault();
     })
 
     var offset_center = window.screen.orientation.angle ? { x: 100, y: 100 } : { x: 100, y: 10 };
