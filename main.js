@@ -140,6 +140,7 @@ var callback = function() {
         }
     }
     window.addEventListener("orientationchange", e => {
+        $('html, body').scrollTop(1);
 
         if (e.target.screen.orientation.angle) {
             offset_center = { x: 100, y: 100 };
