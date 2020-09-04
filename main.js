@@ -119,9 +119,10 @@ var callback = function() {
 
     window.addEventListener('touchend', e => {
         ignore_touch = false;
+        alert("Value: " + e.path[0].value);
+
         document.getElementsByClassName('d-pad')[0].classList.remove('moving');
         if (e.path[0].classList.contains("arrow")) {
-            alert("Value: " + e.path[0].value);
             e.path[0].click();
             e.stopPropagation();
             e.preventDefault();
