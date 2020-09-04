@@ -1,3 +1,18 @@
+function checkVisible(elm) {
+    var offset = $(elm).offset();
+    var top = offset.top,
+        bottom = offset.top + $(elm).outerHeight();
+    var btmscreen = $(window).scrollTop() + $(window).innerHeight();
+    var topscreen = $(window).scrollTop();
+
+    var left = offset.left,
+        right = offset.left + $(elm).outerWidth();
+    var leftscreen = $(window).scrollLeft();
+    var rghtscreen = $(window).scrollLeft() + $(window).innerWidth();
+
+    return (btmscreen > top) && (topscreen < bottom) && rghtscreen > right && leftscreen < left;
+}
+
 var lhmap = new LHMap();
 var callback = function() {
     var dp = document.getElementsByClassName("d-pad")[0];
@@ -110,13 +125,34 @@ var callback = function() {
         setdpadpos(e);
     })
 
+    var offset_center = window.screen.orientation.angle ? { x: 100, y: 100 } : { x: 100, y: 10 };
+
+    function resetdpad() {
+        console.log(checkVisible($(".d-pad .center")[0]))
+        if (!checkVisible($(".d-pad .center")[0])) {
+            $(".d-pad").css({ left: '200px', top: '200px' })
+            LHMap.settings.mousepadposition.value.top = 200;
+            LHMap.settings.mousepadposition.value.left = 200;
+            LHMap.settings.save();
+        }
+    }
+    window.addEventListener("orientationchange", e => {
+
+        if (e.target.screen.orientation.angle) {
+            offset_center = { x: 100, y: 100 };
+        } else {
+            offset_center = { x: 100, y: 10 };
+        }
+        setTimeout(resetdpad, 50);
+    })
+
     function setdpadpos(e) {
         var dpad = document.getElementsByClassName('d-pad')[0];
-        dpad.style.left = (e.changedTouches[0].pageX - 100) + 'px';
-        dpad.style.top = (e.changedTouches[0].pageY - 10) + 'px';
+        dpad.style.left = (e.changedTouches[0].pageX - offset_center.x) + 'px';
+        dpad.style.top = (e.changedTouches[0].pageY - offset_center.y) + 'px';
 
-        LHMap.settings.mousepadposition.value.top = (e.changedTouches[0].pageY - 10);
-        LHMap.settings.mousepadposition.value.left = (e.changedTouches[0].pageX - 100);
+        LHMap.settings.mousepadposition.value.top = (e.changedTouches[0].pageY - offset_center.y);
+        LHMap.settings.mousepadposition.value.left = (e.changedTouches[0].pageX - offset_center.x);
         LHMap.settings.save();
     }
 
