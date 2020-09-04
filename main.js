@@ -122,10 +122,11 @@ var callback = function() {
         document.getElementsByClassName('d-pad')[0].classList.remove('moving');
         if (e.path[0].classList.contains("arrow")) {
             e.path[0].click();
+            e.stopPropagation();
+            e.preventDefault();
+            return false;
         }
-        e.stopPropagation();
-        e.preventDefault();
-        return false;
+
     }, false);
 
     window.addEventListener('dragover', e => {
