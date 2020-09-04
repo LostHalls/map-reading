@@ -233,13 +233,20 @@ table {
 
 input[type="button"] {
     padding: 8px;
-    width: 120px;
+    width: 220px;
+    font-size: 1em;
     font-weight: bold;
     border-radius: 0;
     border: 1px solid hsl(0, 0%, 25%);
     background-color: hsl(0, 0%, 30%);
     color: #d8d8d8;
     outline: none;
+}
+
+#display input[type="button"] {
+    width: 220px;
+    font-size: 1.5em;
+    margin-left: 0;
 }
 
 input[type="button"]:hover {
@@ -274,9 +281,7 @@ input[type="color"] {
 }
 
 #settings-modal input[type="checkbox"] {
-    float: none;
-    margin-left: 50%;
-    transform: translate(-50%);
+    margin-right: 60px;
     width: 18px;
     height: 18px;
     margin-top: 0;
