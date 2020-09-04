@@ -99,7 +99,7 @@ var callback = function() {
         else {
             ignore_touch = false;
             document.getElementsByClassName('d-pad')[0].classList.add('moving');
-            setdpadpos(e);
+            //setdpadpos(e);
             startpos.x = e.changedTouches[0].pageX;
             startpos.y = e.changedTouches[0].pageY;
         }
@@ -132,8 +132,12 @@ var callback = function() {
         }
         if (e.path[0] == document.querySelector(".d-pad .center")) {
             if (startpos.x == e.changedTouches[0].pageX &&
-                startpos.y == e.changedTouches[0].pageY)
+                startpos.y == e.changedTouches[0].pageY) {
                 lhmap.setup();
+                e.stopPropagation();
+                e.preventDefault();
+                return false;
+            }
         }
     }, false);
 
