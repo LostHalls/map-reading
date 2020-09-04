@@ -172,14 +172,14 @@ var callback = function() {
             e.preventDefault();
             return false;
         }
-        if (e.path[0] == document.querySelector(".d-pad .center")) {
-            if (startpos.x == e.changedTouches[0].pageX &&
-                startpos.y == e.changedTouches[0].pageY) {
-                lhmap.setup();
-                e.stopPropagation();
-                e.preventDefault();
-                return false;
-            }
+        if (e.path[0] == document.querySelector(".d-pad .center") &&
+            LHMap.settings.toggledpadcenterproc.value &&
+            startpos.x == e.changedTouches[0].pageX &&
+            startpos.y == e.changedTouches[0].pageY) {
+            lhmap.setup();
+            e.stopPropagation();
+            e.preventDefault();
+            return false;
         }
     }, false);
 

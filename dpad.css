@@ -17,10 +17,13 @@
     z-index: 99;
 }
 
+.d-pad {
+    touch-action: none;
+}
+
 .d-pad .center:hover,
 .d-pad .center {
     background-color: rgba(255, 255, 255, .5);
-    touch-action: none;
 }
 
 .d-pad .arrow {
