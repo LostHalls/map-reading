@@ -155,8 +155,12 @@ class Settings {
                 var namecell = document.createElement('td');
                 namecell.colSpan = 2;
                 namecell.innerText = option.name;
+
                 var datacell = document.createElement('td');
                 var btn = document.createElement('input');
+                row.dataset.key = option.key;
+                row.addEventListener('click', function(e) { document.querySelector(`#settings-modal input[data-key=${this.dataset.key}]`).click() });
+
                 btn.dataset.key = option.key;
                 //btn.innerText = option.value;
                 switch (option.type) {
