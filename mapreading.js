@@ -490,6 +490,14 @@ class LHMap {
                         ctx.drawImage(img, 100 * y + 20 + shifty, 100 * x + 20 + shiftx, 60, 60);
                     }
                 }
+
+                if (this.troom_showing && this.rooms[x][y].isTRoom && this.pots.length < 5) {
+                    ctx.fillStyle = "pink";
+                    ctx.beginPath();
+                    ctx.arc(100 * this.troom.y + (50 + shifty), 100 * this.troom.x + (50 + shiftx), 8, 0, 2 * Math.PI);
+                    ctx.fill();
+                }
+
             }
         }
         if (this.showborders) {
@@ -806,6 +814,14 @@ class LHMap {
 
         this.start.isSeen = true;
         this.current = this.start;
+        this.troom_showing = true;
+        if (this.troom_timeout) {
+            clearTimeout(this.troom_timeout);
+        }
+        this.troom_timeout = setTimeout(() => {
+            this.troom_showing = false;
+            this.paint();
+        }, 1000);
         this.paint();
     }
 
