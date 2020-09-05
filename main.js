@@ -133,7 +133,6 @@ var callback = function() {
     var offset_center = window.screen.orientation.angle ? { x: 100, y: 100 } : { x: 100, y: 10 };
 
     function resetdpad() {
-        console.log(checkVisible($(".d-pad .center")[0]))
         if (!checkVisible($(".d-pad .center")[0])) {
             $(".d-pad").css({ left: '200px', top: '200px' })
             LHMap.settings.mousepadposition.value.top = 200;

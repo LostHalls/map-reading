@@ -118,7 +118,7 @@ class Settings {
         this.undo = new Setting("Keybind", "key", "undo", "Undo Last Action", "Backspace");
         this.showmain = new Setting("Keybind", "key", "showmain", "Show Main Path", 'm', true);
         this.togglemousepad = new Setting("Keybind", "key", "togglemousepad", "Toggle D-Pad", 'h');
-        this.toggledpadcenterproc = new Setting("Keybind", "bool", "toggledpadcenterproc", "Toggle D-Pad Center Changing Map", true)
+        this.toggledpadcenterproc = new Setting("Keybind", "bool", "toggledpadcenterproc", "Toggle D-Pad Center Changing Map", true);
         this.showmousepad = new Setting("Visual", "bool", "showmousepad", "Show D-Pad", false);
         this.mousepadposition = new Setting("Visual", "position", "mousepadposition", "D-Pad Position", { top: 100, left: 100 }, true);
         this.cursor = new Setting("Visual", "color", "cursor", "Cursor Color", "#800080");
@@ -1529,11 +1529,11 @@ class LHMap {
 LHMap.settings = new Settings();
 LHMap.resources = (function RetrieveResources() {
     var resources = {};
-    resources.pot = new Image();
-    resources.pot.src = 'images/Pot.png';
-    resources.defender = new Image();
-    resources.defender.src = 'images/Defender.png';
-    resources.troom = new Image();
-    resources.troom.src = 'images/Troom.png';
+
+    for (var item of["cutoffs", "defender", "map", "pot", "rooms", "settings", "troom"]) {
+        resources[item] = new Image();
+        resources[item].src = `images/${item}.png`;
+    }
+
     return resources;
 })();

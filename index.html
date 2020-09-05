@@ -42,10 +42,27 @@
                 </div>
             </div>
             <div id="buttons">
-                <input type="button" data-for="#settings-modal" class="open-modal" type="button" value="Options" />
-                <input type="button" onclick="lhmap.setup()" type="button" value="New Map" />
-                <!--<button type="button" data-for="#copy-modal" class="open-modal" id="open-copy-mdl">Copy</button>-->
-                <input type="button" onclick="showImage()" value="Copy" />
+                <button type="button" onclick="lhmap.setup()" class="img-btn" title="New Map">
+                    <img src="images/map.png" alt="M" />
+                </button>
+                <button type="button" onclick="showImage(); lhmap.paint()" class="img-btn" title="Copy Map Image">
+                    <img src="images/save.png" alt="S" />
+                </button>
+                <button type="button" onclick="lhmap.undo(); lhmap.paint()" class="img-btn" title="Undo">
+                    <img src="images/undo.png" alt="Backspace" />
+                </button>
+                <button type="button" onclick="lhmap.toggleAll(); lhmap.paint()" class="img-btn" title="Toggle All Rooms">
+                    <img src="images/rooms.png" alt="I" />
+                </button>
+                <button type="button" onclick="lhmap.togglePots(); lhmap.paint()" class="img-btn" title="Toggle Pot Locations">
+                    <img src="images/pot.png" alt="P" />
+                </button>
+                <button type="button" onclick="lhmap.toggleBorders(); lhmap.paint()" class="img-btn" title="Toggle Shifts & Cutoffs">
+                    <img src="images/cutoffs.png" alt="B" />
+                </button>
+                <button type="button" data-for="#settings-modal" class="open-modal img-btn" title="Options">
+                    <img src="images/settings.png" alt="O" data-for="#settings-modal"/>
+                </button>
             </div>
             <div class="d-pad" draggable="true">
                 <a class="up arrow" onclick="lhmap.onUp(); lhmap.paint()"></a>
