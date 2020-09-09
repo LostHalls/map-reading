@@ -888,6 +888,8 @@ class LHMap {
     }
 
     generate() {
+        //Code here is based off of Nacnudd's insane skills
+        //https://github.com/RichmondD/Lost_Halls/tree/4.3
         var map = create9x9();
         var mainpath = create9x9();
         var potloop = false;
