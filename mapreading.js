@@ -51,8 +51,152 @@ class Room {
         var obj = JSON.parse(text);
         return new Room(obj.v, obj.x, obj.y);
     }
+    get hassplits() {
+        return this.up || this.down || this.left || this.right;
+    }
+
+    convert() {
+        if (this.isBorder)
+            return 25;
+        if (!this.hassplits)
+            return 0;
+        if (this.isTRoom)
+            return 16;
+        if (this.isDefender) {
+            if (this.up)
+                return 17;
+            if (this.right)
+                return 18;
+            if (this.down)
+                return 19;
+            if (this.left)
+                return 20;
+        }
+        if (this.isPot) {
+            if (this.up)
+                return 21;
+            if (this.right)
+                return 22;
+            if (this.down)
+                return 23;
+            if (this.left)
+                return 24;
+        }
+
+        return (this.isStart ? 40 : 0) + (this.left << 3) | (this.down << 2) | (this.right << 1) | this.up;
+    }
+    static back(val, x, y) {
+        var room = new Room(0, x, y);
+        switch (val) {
+            case 0:
+                return room;
+            case 16:
+                room.down = true;
+                room.isTRoom = true;
+                return room;
+            case 17:
+                room.up = true;
+                room.isDefender = true;
+                return room;
+            case 18:
+                room.right = true;
+                room.isDefender = true;
+                return room;
+            case 19:
+                room.down = true;
+                room.isDefender = true;
+                return room;
+            case 20:
+                room.left = true;
+                room.isDefender = true;
+                return room;
+            case 21:
+                room.up = true;
+                room.isPot = true;
+                return room;
+            case 22:
+                room.right = true;
+                room.isPot = true;
+                return room;
+            case 23:
+                room.down = true;
+                room.isPot = true;
+                return room;
+            case 24:
+                room.left = true;
+                room.isPot = true;
+                return room;
+            case 25:
+                room.isBorder = true;
+                return room;
+        }
+        if (val > 40) {
+            room.isStart = true;
+            room.isSeen = true;
+            val -= 40;
+        }
+        room.up = !!(val & 0b0001);
+        room.right = !!(val & 0b0010);
+        room.down = !!(val & 0b0100);
+        room.left = !!(val & 0b1000);
+        return room;
+    }
+}
+Room.flags = {
+    empty: 0,
+    room: 1,
+    troom: 16,
+    defender: {
+        up: 17,
+        right: 18,
+        down: 19,
+        left: 20
+    },
+    pot: {
+        up: 21,
+        right: 22,
+        down: 23,
+        left: 24
+    },
+    spawn: 25
+}
+Array.prototype.convert = function() {
+    var str = this.reduce((a, v) => a + v.reduce((bi, room) => bi + String.fromCharCode(room.convert() + 65), ""), "");
+    var out = "";
+    while (str) {
+        var count = 1;
+        var char = str[0];
+        str = str.substring(1);
+        while (str && str[0] == char) {
+            count++;
+            str = str.substring(1);
+        }
+        if (count > 1) {
+            out += count + "" + char;
+        } else
+            out += char;
+    }
+    return out;
 }
 
+String.prototype.revert = function() {
+    var str = this.match(/(\d*\w)/gi).reduce((s, c) => s + (c.length == 1 ? c : c[c.length - 1].repeat(c.match(/\d+/)[0])), "");
+    var arr = [];
+    while (str) {
+        arr.push(str.slice(0, 9));
+        str = str.substring(9);
+    }
+
+    for (var i = 0; i < 9; i++) {
+        var r = arr[i];
+        var row = [];
+        for (var j = 0; j < 9; j++) {
+            row.push(Room.back(r.charCodeAt(j) - 65, i, j));
+        }
+        arr[i] = row;
+    }
+    return arr;
+}
 class Setting {
     constructor(group, type, key, name, value, disabled) {
         this.group = group;
@@ -393,13 +537,52 @@ class LHMap {
 
         if (this.showborders) {
             ctx.fillStyle = LHMap.settings.bordercol.value;
-            if (this.start.x <= 3 - !!shiftx || this.start.x > 4) {
-                ctx.fillRect(shifty, shiftx, 900 - 2 * shifty, 100);
-                ctx.fillRect(shifty, 800 - shiftx, 900 - 2 * shifty, 100);
+
+            var cutoffx = 0;
+            var cutoffy = 0;
+
+            ctx.strokeStyle = "cyan";
+            ctx.lineWidth = 2;
+            var lenx = 9 - (!!shiftx);
+            var leny = 9 - (!!shifty);
+            for (var i = 0; i < lenx; i++) {
+                var empty = true;
+                for (var j = 0; j < leny; j++) {
+                    ctx.strokeRect(100 * i + 3 + shifty, 100 * j + 3 + shiftx, 92, 92);
+                    ctx.strokeRect(100 * (leny - 1 - i) + 3 + shifty, 100 * (lenx - 1 - j) + 3 + shiftx, 92, 92);
+                    var top = this.rooms[i][j];
+                    if (this.rooms[i][j].hassplits) {
+                        empty = false;
+                        break;
+                    }
+                    var down = this.rooms[leny - 1 - i][lenx - 1 - j];
+                    if (this.rooms[leny - 1 - i][lenx - 1 - j].hassplits) {
+                        empty = false;
+                        break;
+                    }
+                }
+                if (empty) cutoffy++;
             }
+            for (var i = 0; i < 9; i++) {
+
+                var empty = true;
+                for (var j = 0; j < 9; j++) {
+                    if (this.rooms[i][j].hassplits) {
+                        empty = false;
+                        break;
+                    }
+                }
+                if (empty) cutoffy++;
+            }
+            cutoffy *= 100;
+            cutoffx = 100;
+            //if (this.start.x <= 3 - !!shiftx || this.start.x > 4) {
+            ctx.fillRect(shifty, shiftx, 900 - 2 * shifty, cutoffy);
+            ctx.fillRect(shifty, (900 - cutoffy) - shiftx, 900 - 2 * shifty, cutoffy);
+            //}
             if (this.start.y <= 3 - !!shifty || this.start.y > 4) {
-                ctx.fillRect(shifty, shiftx, 100, 900 - 2 * shiftx);
-                ctx.fillRect(800 - shifty, shiftx, 100, 900 - 2 * shiftx);
+                ctx.fillRect(shifty, shiftx, cutoffx, 900 - 2 * shiftx);
+                ctx.fillRect((900 - cutoffx) - shifty, shiftx, cutoffx, 900 - 2 * shiftx);
             }
         }
 
@@ -420,18 +603,16 @@ class LHMap {
         for (var x = 8; x >= 0; x--) {
             for (var y = 8; y >= 0; y--) {
                 if (this.rooms[x][y].isSeen ||
-                    (this.showallrooms && !this.rooms[x][y].isBorder && (this.rooms[x][y].up || this.rooms[x][y].down || this.rooms[x][y].left || this.rooms[x][y].right))) {
+                    (this.showallrooms && !this.rooms[x][y].isBorder && (this.rooms[x][y].hassplits))) {
                     ctx.fillStyle = "hsl(0, 0%, 20%)";
-                    if ((this.main[x][y] || this.rooms[x][y].isDefender) && this.showmain)
-                        ctx.fillStyle = "yellow";
+
                     ctx.fillRect(100 * y + 15 + shifty, 100 * x + 15 + shiftx, 70, 70);
                     ctx.fillStyle = "gray";
                     ctx.fillRect(100 * y + 20 + shifty, 100 * x + 20 + shiftx, 60, 60);
 
                     if (this.rooms[x][y].up) {
                         ctx.fillStyle = "hsl(0, 0%, 20%)";
-                        if ((this.main[x][y] || this.rooms[x][y].isDefender) && this.showmain && (this.main[x - 1][y] || this.rooms[x - 1][y].isDefender))
-                            ctx.fillStyle = "yellow";
+
 
                         var dist = extend;
 
@@ -441,8 +622,7 @@ class LHMap {
                     }
                     if (this.rooms[x][y].down) {
                         ctx.fillStyle = "hsl(0, 0%, 20%)";
-                        if ((this.main[x][y] || this.rooms[x][y].isDefender) && this.showmain && (this.main[x + 1][y] || this.rooms[x + 1][y].isDefender))
-                            ctx.fillStyle = "yellow";
+
                         var dist = extend;
 
                         ctx.fillRect(100 * y + (33 + shifty), 100 * x + (85 + shiftx), 34, dist);
@@ -452,8 +632,7 @@ class LHMap {
                     }
                     if (this.rooms[x][y].left) {
                         ctx.fillStyle = "hsl(0, 0%, 20%)";
-                        if ((this.main[x][y] || this.rooms[x][y].isDefender) && this.showmain && (this.main[x][y - 1] || this.rooms[x][y - 1].isDefender))
-                            ctx.fillStyle = "yellow";
+
                         var dist = extend;
 
                         ctx.fillRect(100 * y + shifty + (15 - dist), 100 * x + (33 + shiftx), dist, 34);
@@ -462,8 +641,7 @@ class LHMap {
                     }
                     if (this.rooms[x][y].right) {
                         ctx.fillStyle = "hsl(0, 0%, 20%)";
-                        if ((this.main[x][y] || this.rooms[x][y].isDefender) && this.showmain && (this.main[x][y + 1] || this.rooms[x][y + 1].isDefender))
-                            ctx.fillStyle = "yellow";
+
 
                         dist = extend;
                         ctx.fillRect(100 * y + (85 + shifty), 100 * x + (33 + shiftx), dist, 34);
@@ -539,8 +717,7 @@ class LHMap {
 
                 //fill half of room
                 ctx.fillStyle = "hsl(0, 0%, 20%)";
-                if (this.main[px][py] && this.showmain)
-                    ctx.fillStyle = "yellow";
+
                 ctx.fillRect(100 * py + 15 + shifty, 100 * px + 50 + shiftx, 70, 35);
                 ctx.fillStyle = "gray";
                 ctx.fillRect(100 * py + 20 + shifty, 100 * px + 50 + shiftx, 60, 30);
@@ -742,7 +919,7 @@ class LHMap {
         this.__global_defendershit += change;
         localStorage.setItem("defendershit", this.__global_defendershit);
     }
-    constructor() {
+    constructor(map) {
         this.__global_potshit = parseInt(localStorage.getItem("potshit")) || 0;
         this.__potshit = 0;
         this.__global_defendershit = parseInt(localStorage.getItem("defendershit")) || 0;
@@ -763,7 +940,7 @@ class LHMap {
 
         LHMap.settings.onchange(this);
 
-        this.setup();
+        this.setup(map);
 
         var _this = this;
 
@@ -777,11 +954,14 @@ class LHMap {
             return false;
         });
     }
-    setup() {
+    setup(map) {
         if (this.rooms) {
             this.savemap();
         }
-        [this.rooms, this.main] = this.generate();
+        if (map) {
+            this.rooms = map.revert();
+        } else
+            [this.rooms, this.main] = this.generate();
         this.pots = [];
         this.borders = [];
         this.start = this.rooms[4][4];
@@ -803,8 +983,6 @@ class LHMap {
                     this.troom = room;
                 if (room.isStart)
                     this.start = room;
-                if (room.isMainPath)
-                    this.main.push(room);
                 if (room.isBorder)
                     this.borders.push(room);
             }
