@@ -60,6 +60,9 @@
                 <button type="button" onclick="lhmap.toggleBorders(); lhmap.paint()" class="img-btn" title="Toggle Shifts & Cutoffs">
                     <img src="images/cutoffs.png" alt="B" />
                 </button>
+                <button type="button" onclick="copyTextToClipboard(window.location.pathname + '?map=' + lhmap.rooms.convert())" class="img-btn" title="Share Map">
+                    <img src="images/share.png" alt="Share" />
+                </button>
                 <button type="button" data-for="#settings-modal" class="open-modal img-btn" title="Options">
                     <img src="images/settings.png" alt="O" data-for="#settings-modal"/>
                 </button>
