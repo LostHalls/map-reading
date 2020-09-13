@@ -153,14 +153,15 @@ var callback = function() {
 
     var ignore_touch = false;
     window.addEventListener('touchstart', e => {
+        var touch = (e.originalEvent.touches[0] || e.originalEvent.changedTouches[0] || e.changedTouches[0] || e.touches[0]);
         if (e.path[0] !== document.querySelector('.d-pad .center'))
             ignore_touch = true;
         else {
             ignore_touch = false;
             document.getElementsByClassName('d-pad')[0].classList.add('moving');
             //setdpadpos(e);
-            startpos.x = e.changedTouches[0].pageX;
-            startpos.y = e.changedTouches[0].pageY;
+            startpos.x = touch.pageX;
+            startpos.y = touch.pageY;
             e.preventDefault();
             e.stopPropagation();
         }
@@ -195,16 +196,19 @@ var callback = function() {
 
     function setdpadpos(e) {
         var dpad = document.getElementsByClassName('d-pad')[0];
-        dpad.style.left = (e.changedTouches[0].pageX - offset_center.x) + 'px';
-        dpad.style.top = (e.changedTouches[0].pageY - offset_center.y) + 'px';
+        var touch = (e.originalEvent.touches[0] || e.originalEvent.changedTouches[0] || e.changedTouches[0] || e.touches[0]);
 
-        LHMap.settings.mousepadposition.value.top = (e.changedTouches[0].pageY - offset_center.y);
-        LHMap.settings.mousepadposition.value.left = (e.changedTouches[0].pageX - offset_center.x);
+        dpad.style.left = (touch.pageX - offset_center.x) + 'px';
+        dpad.style.top = (touch.pageY - offset_center.y) + 'px';
+
+        LHMap.settings.mousepadposition.value.top = (touch.pageY - offset_center.y);
+        LHMap.settings.mousepadposition.value.left = (touch.pageX - offset_center.x);
         LHMap.settings.save();
     }
 
     window.addEventListener('touchend', e => {
         ignore_touch = false;
+        var touch = (e.originalEvent.touches[0] || e.originalEvent.changedTouches[0] || e.changedTouches[0] || e.touches[0]);
 
         document.getElementsByClassName('d-pad')[0].classList.remove('moving');
         if (e.path[0].classList.contains("arrow")) {
@@ -215,8 +219,8 @@ var callback = function() {
         }
         if (e.path[0] == document.querySelector(".d-pad .center") &&
             LHMap.settings.toggledpadcenterproc.value &&
-            startpos.x == e.changedTouches[0].pageX &&
-            startpos.y == e.changedTouches[0].pageY) {
+            startpos.x == touch.pageX &&
+            startpos.y == touch.pageY) {
             lhmap.setup();
             e.stopPropagation();
             e.preventDefault();
