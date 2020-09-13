@@ -153,7 +153,9 @@ var callback = function() {
 
     var ignore_touch = false;
     window.addEventListener('touchstart', e => {
-        var touch = (e.originalEvent.touches[0] || e.originalEvent.changedTouches[0] || e.changedTouches[0] || e.touches[0]);
+        var touch = (e.touches[0] || e.changedTouches[0]);
+        if (!touch && e.originalEvent)
+            touch = e.originalEvent.touches[0] || e.originalEvents.changedTouches[0];
         if (e.path[0] !== document.querySelector('.d-pad .center'))
             ignore_touch = true;
         else {
@@ -196,8 +198,9 @@ var callback = function() {
 
     function setdpadpos(e) {
         var dpad = document.getElementsByClassName('d-pad')[0];
-        var touch = (e.originalEvent.touches[0] || e.originalEvent.changedTouches[0] || e.changedTouches[0] || e.touches[0]);
-
+        var touch = (e.touches[0] || e.changedTouches[0]);
+        if (!touch && e.originalEvent)
+            touch = e.originalEvent.touches[0] || e.originalEvents.changedTouches[0];
         dpad.style.left = (touch.pageX - offset_center.x) + 'px';
         dpad.style.top = (touch.pageY - offset_center.y) + 'px';
 
@@ -208,8 +211,9 @@ var callback = function() {
 
     window.addEventListener('touchend', e => {
         ignore_touch = false;
-        var touch = (e.originalEvent.touches[0] || e.originalEvent.changedTouches[0] || e.changedTouches[0] || e.touches[0]);
-
+        var touch = (e.touches[0] || e.changedTouches[0]);
+        if (!touch && e.originalEvent)
+            touch = e.originalEvent.touches[0] || e.originalEvents.changedTouches[0];
         document.getElementsByClassName('d-pad')[0].classList.remove('moving');
         if (e.path[0].classList.contains("arrow")) {
             e.path[0].click();
