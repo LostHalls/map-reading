@@ -66,20 +66,8 @@ main>* {
 
 main {
     margin: auto;
-    width: intrinsic;
-    /* Safari/WebKit uses a non-standard name */
-    width: -moz-max-content;
-    /* Firefox/Gecko */
-    width: -webkit-max-content;
-    /* Chrome */
-    height: intrinsic;
-    /* Safari/WebKit uses a non-standard name */
-    height: -moz-max-content;
-    /* Firefox/Gecko */
-    height: -webkit-max-content;
     width: fit-content;
     height: fit-content;
-    /* Chrome */
 }
 
 body {
