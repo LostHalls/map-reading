@@ -916,7 +916,7 @@ class LHMap {
         if (map) {
             this.rooms = map.revert();
         } else
-            [this.rooms, this.main] = this.generate();
+            [this.rooms, this.main, this.lm4] = this.generate();
         this.pots = [];
         this.borders = [];
         this.start = this.rooms[4][4];
@@ -1028,6 +1028,7 @@ class LHMap {
         var potloop = false;
         var mainloop = false;
         var forceloop = false;
+        var lm4;
         map[4][4] = 420;
 
         var mainlength = 10;
@@ -1038,14 +1039,15 @@ class LHMap {
         cleanMap();
 
         var rooms = create9x9();
-
+        var lmr = create9x9();
         for (var i = 0; i < map.length; i++) {
             for (var j = 0; j < map.length; j++) {
                 rooms[i][j] = new Room(map[i][j], i, j);
+                lmr[i][j] = new Room(lm4[i][j], i, j);
             }
         }
 
-        return [rooms, mainpath];
+        return [rooms, mainpath, lmr];
 
         function create9x9() {
             var map = [];
@@ -1330,26 +1332,64 @@ class LHMap {
         }
 
         function createPots() {
-            while (!createNewPot(4, 4, 0, true));
+            console.log("Creating pots");
+            while (!createNewPot(4, 4, 0, true)) {}
 
             var potsplaced = 0;
             var potspaceavailable = true;
             var tries = 0;
 
-            while (potspaceavailable && potsplaced < 5) {
+            while (potspaceavailable && potsplaced != 5) {
                 if (createNewPot(4, 4, 0, false)) { potsplaced++; }
-                if (tries > 30) {
-                    if (createNewPot(4, 4, 4, false)) { potsplaced++; } else if (createNewPot(4, 4, 3, false)) { potsplaced++; } else if (createNewPot(4, 4, 2, false)) { potsplaced++; } else { potspaceavailable = false; }
+
+                if (tries > 30 && potsplaced != 5) {
+                    if (createNewPot(4, 4, 4, false))
+                        potsplaced++;
+                    else if (createNewPot(4, 4, 3, false))
+                        potsplaced++;
+                    else if (createNewPot(4, 4, 2, false))
+                        potsplaced++;
+                    else
+                        break;
                 }
                 tries++;
+                var l2 = create9x9();
+                for (var i = 0; i < map.length; i++) {
+                    for (var j = 0; j < map.length; j++) {
+                        l2[i][j] = new Room(map[i][j], i, j);
+                    }
+                }
+
+                var pc = 0;
+                for (var i = 0; i < l2.length; i++) {
+                    for (var j = 0; j < l2.length; j++) {
+                        if (l2[i][j].isPot)
+                            pc++;
+                    }
+                }
+
+                if (pc > 5) {
+                    console.log('alert ' + tries);
+                } else {
+                    console.log(pc + ' ' + tries);
+                }
             }
+
+            lm4 = map.map((v) => v.join(",")).join(".").split(".").map((v) => v.split(",").map((v2) => parseInt(v2)));
+
         }
 
         function createNewPot(x, y, forcepots, troom) {
             var works = false;
             if ((rand() < 1.0 / mainlength) || (forcepots > 0)) {
-                if (troom) { works = createNextRoom(x, y, 1, 0, rand(3) + 2, false); } else if (forcepots > 0) { works = createNextRoom(x, y, 2, 0, rand(forcepots - 1) + 2, false); } else { works = createNextRoom(x, y, 2, 0, rand(3) + 2, false); }
-                if (works) { return true; }
+                if (troom)
+                    works = createNextRoom(x, y, 1, 0, rand(3) + 2, false);
+                else if (forcepots > 0)
+                    works = createNextRoom(x, y, 2, 0, rand(forcepots - 1) + 2, false);
+                else
+                    works = createNextRoom(x, y, 2, 0, rand(3) + 2, false);
+                if (works)
+                    return true;
             }
 
             if (map[y][x] % 2 == 1) {

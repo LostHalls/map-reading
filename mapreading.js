@@ -1338,7 +1338,7 @@ class LHMap {
 
             while (potspaceavailable && potsplaced < 5) {
                 if (createNewPot(4, 4, 0, false)) { potsplaced++; }
-                if (tries > 30) {
+                if (tries > 30 && potsplaced < 5) {
                     if (createNewPot(4, 4, 4, false)) { potsplaced++; } else if (createNewPot(4, 4, 3, false)) { potsplaced++; } else if (createNewPot(4, 4, 2, false)) { potsplaced++; } else { potspaceavailable = false; }
                 }
                 tries++;

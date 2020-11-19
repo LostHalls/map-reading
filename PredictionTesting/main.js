@@ -63,55 +63,70 @@ function create9x9() {
 var lhmap, map = false;
 try {
     map = new URLSearchParams(window.location.search).get("map");
+
 } catch (e) {}
-var cutoffsX = 0,
-    cutoffsY = 0;
-lhmap = new LHMap(map);
-var def, dx, dy;
-do {
-    cutoffsX = 0;
-    cutoffsY = 0;
-    try {
+var avg = 0,
+    rolls = [];
+for (var cnt = 0; cnt < 1; cnt++) {
+    var ttl = 0;
 
-        lhmap.setup();
+    var cutoffsX = 0,
+        cutoffsY = 0;
 
-        def = create9x9();
-        dy = lhmap.defender.y;
-        dx = lhmap.defender.x;
-        var cx = dx,
-            cy = dy;
-        if (lhmap.defender.up) {
-            cx--;
-            cy -= 2;
-        } else if (lhmap.defender.down)
-            cx--;
-        else if (lhmap.defender.left) {
-            cx -= 2;
-            cy--;
-        } else
-            cy--;
+    lhmap = new LHMap(map);
 
-        for (var i = 0; i < 3; i++) {
-            for (var j = 0; j < 3; j++) {
-                def[cx + i][cy + j] = 1;
+    var def, dx, dy;
+    do {
+        cutoffsX = 0;
+        cutoffsY = 0;
+        try {
+
+            lhmap.setup();
+            ttl++;
+            /*def = create9x9();
+            dy = lhmap.defender.y;
+            dx = lhmap.defender.x;
+            var cx = dx,
+                cy = dy;
+            if (lhmap.defender.up) {
+                cx--;
+                cy -= 2;
+            } else if (lhmap.defender.down)
+                cx--;
+            else if (lhmap.defender.left) {
+                cx -= 2;
+                cy--;
+            } else
+                cy--;
+
+            for (var i = 0; i < 3; i++) {
+                for (var j = 0; j < 3; j++) {
+                    def[cx + i][cy + j] = 1;
+                }
             }
-        }
-        for (var x = 0; x < 9; x++) {
-            var row = true,
-                col = true;
-            for (var y = 0; y < 9; y++) {
-                if ((lhmap.rooms[x][y].convert() != 0 && !lhmap.rooms[x][y].isBorder) || def[x][y])
-                    row = false;
-                if ((lhmap.rooms[y][x].convert() != 0 && !lhmap.rooms[y][x].isBorder) || def[y][x])
-                    col = false;
-            }
-            if (row)
-                cutoffsX++;
-            if (col)
-                cutoffsY++;
-        }
-    } catch {}
-} while ((cutoffsX < 4 && cutoffsY < 4) || lhmap.pots.length > 2);
+            for (var x = 0; x < 9; x++) {
+                var row = true,
+                    col = true;
+                for (var y = 0; y < 9; y++) {
+                    if ((lhmap.rooms[x][y].convert() != 0 && !lhmap.rooms[x][y].isBorder) || def[x][y])
+                        row = false;
+                    if ((lhmap.rooms[y][x].convert() != 0 && !lhmap.rooms[y][x].isBorder) || def[y][x])
+                        col = false;
+                }
+                if (row)
+                    cutoffsX++;
+                if (col)
+                    cutoffsY++;
+            }*/
+        } catch {}
+    } while (lhmap.pots.length != 6);
+    console.log(ttl);
+    rolls.push(ttl);
+    avg += ttl;
+}
+avg /= 10;
+console.log("average " + avg);
+//} while ((cutoffsX < 4 && cutoffsY < 4) || lhmap.pots.length > 2);
 console.log(def);
 console.log(lhmap.rooms);
 console.log(dx);
