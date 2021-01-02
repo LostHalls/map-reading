@@ -625,7 +625,7 @@ class LHMap {
                     }
                 }
 
-                if (this.troom_showing && this.rooms[x][y].isTRoom && this.pots.length < 5) {
+                if (this.rooms[x][y].isTRoom && ((this.troom_showing && this.pots.length < 5) || this.pots.some(p => p.isSeen))) {
                     ctx.fillStyle = "pink";
                     ctx.beginPath();
                     ctx.arc(100 * this.troom.y + (50 + shifty), 100 * this.troom.x + (50 + shiftx), 8, 0, 2 * Math.PI);
@@ -654,6 +654,7 @@ class LHMap {
 
             ctx.strokeRect(100 * this.troom.y + shifty, 100 * this.troom.x + shiftx, 100, 100);
         }
+
         ctx.fillStyle = LHMap.settings.cursor.value;
         ctx.beginPath();
         ctx.arc(100 * this.current.y + (50 + shifty), 100 * this.current.x + (50 + shiftx), 8, 0, 2 * Math.PI);

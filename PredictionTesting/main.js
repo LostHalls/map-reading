@@ -119,7 +119,7 @@ for (var cnt = 0; cnt < 1; cnt++) {
                     cutoffsY++;
             }*/
         } catch {}
-    } while (lhmap.pots.length != 6);
+    }  while ((cutoffsX < 4 && cutoffsY < 4));
     console.log(ttl);
     rolls.push(ttl);
     avg += ttl;
