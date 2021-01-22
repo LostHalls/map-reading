@@ -1,0 +1,79 @@
+#map-canvas {
+    background-color: #aaa;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+}
+
+main,
+html,
+body {
+    height: 100%;
+    width: 100%;
+}
+
+body {
+    display: grid;
+    grid-template-columns: auto;
+    grid-template-rows: max-content auto;
+    grid-template-areas: "nav" "main";
+    background: #ddd;
+}
+
+body>* {
+    text-align: center;
+}
+
+nav {
+    grid-area: nav;
+    height: 60px;
+}
+
+main {
+    grid-area: main;
+    display: grid;
+    grid-template-areas: ". dpad-top ." "dpad-left map dpad-right" ". dpad-bottom .";
+}
+
+#map-container {
+    grid-area: map;
+    display: grid;
+    height: 100%;
+    width: 100%;
+}
+
+canvas {
+    background-color: red;
+    grid-area: map-area;
+}
+
+
+/** d-pad buttons **/
+
+#dpad-left-container {
+    grid-area: dpad-left;
+}
+
+#dpad-right-container {
+    grid-area: dpad-right;
+}
+
+#dpad-top-container {
+    grid-area: dpad-top;
+}
+
+#dpad-bottom-container {
+    grid-area: dpad-bottom;
+}
+
+#dpad-container {
+    width: 100%;
+    height: 100%;
+}
+
+.dpad {
+    margin: auto;
+}

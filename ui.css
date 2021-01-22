@@ -292,14 +292,18 @@ input[type="button"]:active,
     border: 1px solid hsl(0, 0%, 40%);
     background-color: hsl(0, 0%, 50%);
     outline: none;
-    border-radius: 0;
+    cursor: pointer;
+}
+
+.img-btn:hover {
+    box-shadow: 1px 1px 2px 2px black;
 }
 
 .img-btn {
     padding: 2px;
     width: 62px;
     height: 62px;
-    border-radius: 0;
+    border-radius: 10%;
     border: 1px solid hsl(0, 0%, 25%);
     background-color: hsl(0, 0%, 30%);
     outline: none;
@@ -308,7 +312,7 @@ input[type="button"]:active,
 
 .img-btn img {
     width: 56px;
-    height: 56px;
+    border-radius: 8%;
 }
 
 tr:not(.setting-title):hover {
@@ -345,4 +349,8 @@ input[type="color"] {
     flex-wrap: wrap;
     flex-basis: 2;
     justify-content: space-between;
+}
+
+.modal-content::-webkit-scrollbar {
+    display: none;
 }
