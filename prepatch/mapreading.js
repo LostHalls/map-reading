@@ -220,7 +220,7 @@ class Settings {
         if (localStorage.getItem("prepatch-settings-version") != "1.3-prepatch") {
             localStorage.removeItem("prepatch-settings");
             this.save();
-            localStorage.setItem("prepatchsettings-version", "1.3-prepatch");
+            localStorage.setItem("prepatch-settings-version", "1.3-prepatch");
             Settings.settingsChanged = true;
         } else {
             var settings = localStorage.getItem('prepatch-settings');
