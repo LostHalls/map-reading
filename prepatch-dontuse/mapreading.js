@@ -1349,7 +1349,9 @@ class LHMap {
         function createNewPot(x, y, forcepots, troom) {
             var works = false;
             if ((rand() < 1.0 / mainlength) || (forcepots > 1)) {
-                if (troom) { works = createNextRoom(x, y, 1, 0, rand(2) + 2, false); } else if (forcepots > 0) { works = createNextRoom(x, y, 2, 0, rand(forcepots - 1) + 2, false); } else { works = createNextRoom(x, y, 2, 0, rand(2) + 2, false); }
+                if (troom) { works = createNextRoom(x, y, 1, 0, rand(2) + 2, false); } else if (forcepots > 0) { works = createNextRoom(x, y, 2, 0, rand(forcepots - 1) + 2, false); }
+                e
+                lse { works = createNextRoom(x, y, 2, 0, rand(2) + 2, false); }
                 if (works) { return true; }
             }
 

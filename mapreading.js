@@ -625,7 +625,7 @@ class LHMap {
                     }
                 }
 
-                if (this.rooms[x][y].isTRoom && ((this.troom_showing && this.pots.length < 5) || this.pots.some(p => p.isSeen))) {
+                if (this.rooms[x][y].isTRoom && ((this.troom_showing && this.pots.length < 5) || (this.pots.some(p => p.isSeen) && this.pots.filter(p => p.isSeen).length < (this.pots.length < 3 ? this.pots.length : 3)))) {
                     ctx.fillStyle = "pink";
                     ctx.beginPath();
                     ctx.arc(100 * this.troom.y + (50 + shifty), 100 * this.troom.x + (50 + shiftx), 8, 0, 2 * Math.PI);
@@ -948,17 +948,33 @@ class LHMap {
 
         this.start.isSeen = true;
         this.current = this.start;
-        this.troom_showing = true;
+        this.troom_showing = false;
         if (this.troom_timeout) {
             clearTimeout(this.troom_timeout);
         }
-        this.troom_timeout = setTimeout(() => {
-            this.troom_showing = false;
-            this.paint();
-        }, 1000);
         this.paint();
+        this.loopTrooms();
     }
-
+    loopTrooms() {
+        return new Promise(async(resolve) => {
+            for (let i = this.pots.length; i < 5; i++) {
+                await this.toggleTroom();
+                await new Promise(res => setTimeout(res, 500));
+            }
+            resolve();
+        });
+    }
+    toggleTroom() {
+        this.troom_showing = true;
+        this.paint();
+        return new Promise((resolve, reject) => {
+            this.troom_timeout = setTimeout(() => {
+                this.troom_showing = false;
+                this.paint();
+                resolve();
+            }, 1000);
+        })
+    }
     clip() {
         this.canvas.toBlob(function(blob) {
             const item = new ClipboardItem({ "image/png": blob });
@@ -1026,7 +1042,6 @@ class LHMap {
         //https://github.com/RichmondD/Lost_Halls/tree/4.3
         var map = create9x9();
         var mainpath = create9x9();
-        var potloop = false;
         var mainloop = false;
         var forceloop = false;
         map[4][4] = 420;
@@ -1136,11 +1151,8 @@ class LHMap {
                 return false;
             }
 
-            if (((((!mainloop) && pathtype == 0) || ((!potloop) && (pathtype > 0) && (depth < length - 1))) && (rand() <= 1.0 / mainlength)) || (forceloop && (!mainloop))) {
-                if (pathtype == 0)
-                    mainloop = true;
-                if (pathtype > 0)
-                    potloop = true;
+            if ((((!mainloop) && pathtype == 0) && (rand() <= 1.0 / mainlength)) || (forceloop && (!mainloop))) {
+                mainloop = true;
 
                 available = loopSpace(x, y);
 
@@ -1249,8 +1261,7 @@ class LHMap {
                         } else { return true; }
                     }
                 }
-                if (pathtype == 0) mainloop = false;
-                if (pathtype > 0) potloop = false;
+                mainloop = false;
                 if (forceloop) return false;
             }
 
@@ -1340,7 +1351,7 @@ class LHMap {
             while (potspaceavailable && potsplaced < 5) {
                 if (createNewPot(4, 4, 0, false)) { potsplaced++; }
                 if (tries > 30 && potsplaced < 5) {
-                    if (createNewPot(4, 4, 4, false)) { potsplaced++; } else if (createNewPot(4, 4, 3, false)) { potsplaced++; } else if (createNewPot(4, 4, 2, false)) { potsplaced++; } else { potspaceavailable = false; }
+                    if (createNewPot(4, 4, 3, false)) { potsplaced++; } else if (createNewPot(4, 4, 2, false)) { potsplaced++; } else { potspaceavailable = false; }
                 }
                 tries++;
             }
@@ -1349,7 +1360,7 @@ class LHMap {
         function createNewPot(x, y, forcepots, troom) {
             var works = false;
             if ((rand() < 1.0 / mainlength) || (forcepots > 0)) {
-                if (troom) { works = createNextRoom(x, y, 1, 0, rand(3) + 2, false); } else if (forcepots > 0) { works = createNextRoom(x, y, 2, 0, rand(forcepots - 1) + 2, false); } else { works = createNextRoom(x, y, 2, 0, rand(3) + 2, false); }
+                if (troom) { works = createNextRoom(x, y, 1, 0, rand(2) + 2, false); } else if (forcepots > 0) { works = createNextRoom(x, y, 2, 0, rand(forcepots - 1) + 2, false); } else { works = createNextRoom(x, y, 2, 0, rand(2) + 2, false); }
                 if (works) { return true; }
             }
 

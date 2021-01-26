@@ -51,6 +51,7 @@ function copyTextToClipboard(text) {
 }
 
 var lhmap, map = false;
+
 try {
     map = new URLSearchParams(window.location.search).get("map");
 } catch (e) {}
