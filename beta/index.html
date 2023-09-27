@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <script src="scripts/mapgen.js"></script>
+        <script src="scripts/settings.js"></script>
+        <script src="scripts/mapview.js"></script>
+        <link href="styles/site.css" rel="stylesheet" />
+        <link href="styles/maps.css" rel="stylesheet" />
+        <link href="styles/navigation.css" rel="stylesheet" />
+        <script>
+            window.addEventListener('load', () => {
+                const setting = document.querySelector('h-settings');
+                setting.registerSettings(new Settings());
+
+                const editor = new MapEditView(document.querySelector("#editor-map"))
+                const practicer = new MapPracticeView(document.querySelector("#practice-map"));
+                window.practicer = practicer;
+                const practiceMapTab = document.querySelector("#map-practice-tab");
+                const editMapTab = document.querySelector("#map-editor-tab");
+                
+                editor.on("map", ({ map }) => {
+                    practicer.setMap(MapGenerator.shift(map));
+                    practiceMapTab.checked = true;
+                })
+
+                practicer.on("edit", ({ map }) => {
+                    editor.setMap(MapGenerator.unshift(map));
+                    editMapTab.checked = true;
+                })
+            })
+        </script>
+    </head>
+    <body>
+        <!-- I'm not gonna lie I stole this navigation from https://codepen.io/MPDoctor/pen/mpJdYe -->
+        <div class="tab-navigation">
+            <input type="radio" id="map-practice-tab" name="tab-radio" checked>
+            <input type="radio" id="map-history-tab" name="tab-radio">
+            <input type="radio" id="map-editor-tab" name="tab-radio">
+            <input type="radio" id="settings-tab" name="tab-radio">
+            <ul class="tab-header">
+                <li class="tab"><label for="map-practice-tab">Map Practice</label></li>
+                <li class="tab"><label for="map-history-tab">Map History</label></li>
+                <li class="tab"><label for="map-editor-tab">Map Editor</label></li>
+                <li class="tab"><label for="settings-tab">Settings</label></li>
+            </ul>
+            <div class="tab-content">
+                <div class="map-view" id="practice-map">
+                    <div class="wrapper">
+                        <canvas width="1800" height="1800"></canvas>
+                    </div>
+                    <div class="controls">
+                        <button type="button" id="newMap">🔄</button>
+                        <button type="button" id="undoMove">↩️</button>
+                        <button type="button" id="unveilMap">👁️</button>
+                        <button type="button" id="screenshotMap">📸</button>
+                        <button type="button" id="shareMap">🤝</button>
+                        <button type="button" id="openEdit">📝</button>
+                    </div>
+                    <div class="stats">
+                        <div>
+                            <h2>Session Stats</h2>
+                            <div>Pots: <span id="sessionPots">0</span></div>
+                            <div>Defenders: <span id="sessionDefenders">0</span></div>
+                            <div>Pot Ratio: <span id="sessionRatio">No Defenders</span></div>
+                        </div>
+                        <div>
+                            <h2>All Time Stats</h2>
+                            <div>Pots: <span id="lifetimePots">0</span></div>
+                            <div>Defenders: <span id="lifetimeDefenders">0</span></div>
+                            <div>Pot Ratio: <span id="lifetimeRatio">No Defenders</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-content">
+                
+            </div>
+            <div class="tab-content">
+                <div class="map-view" id="editor-map">
+                    <div class="wrapper">
+                        <canvas width="1800" height="1800"></canvas>
+                    </div>
+                    <div class="controls">
+                        <button type="button" id="reset">🔄</button>
+                        <button type="button" id="toggleUp">⬆️</button>
+                        <button type="button" id="toggleDown">⬇️</button>
+                        <button type="button" id="toggleLeft">⬅️</button>
+                        <button type="button" id="toggleRight">➡️</button>
+                        <button type="button" id="setDefender">🛡️</button>
+                        <button type="button" id="deleteRooms">🗑️</button>
+                        <button type="button" id="mapLink">🆗</button>
+                        <a id="showInBrowser" target="_blank">🤝</a>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-content">
+                <h-settings></h-settings>
+            </div>
+        </div>
+    </body>
+</html>
