@@ -22,10 +22,7 @@ New features once beta is completed include:
 - Add change highlight color buttons
 
 ### History
-- Delete map from history
-- Clear history (checkbox include favorites)
 - Ability to name maps in history
-- export/import multiple maps
 
 ### Map Editor
 - Make defender not placeable if bleeds out of map
