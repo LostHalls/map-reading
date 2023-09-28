@@ -35,7 +35,7 @@ New features once beta is completed include:
 ### Settings
 - Implement Settings UI
 
-## MapReadingPractice-Web
+# MapReadingPractice 1.0
 HTML/JavaScript fork of the Java Map Reading Practice program, with some changes.
 
 ## Link to Website
