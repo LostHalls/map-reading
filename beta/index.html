@@ -7,6 +7,7 @@
         <link href="styles/site.css" rel="stylesheet" />
         <link href="styles/maps.css" rel="stylesheet" />
         <link href="styles/navigation.css" rel="stylesheet" />
+        <link href="styles/history.css" rel="stylesheet" />
         <script>
             window.addEventListener('load', () => {
                 const setting = document.querySelector('h-settings');
@@ -14,7 +15,7 @@
 
                 const editor = new MapEditView(document.querySelector("#editor-map"))
                 const practicer = new MapPracticeView(document.querySelector("#practice-map"));
-                window.practicer = practicer;
+                
                 const practiceMapTab = document.querySelector("#map-practice-tab");
                 const editMapTab = document.querySelector("#map-editor-tab");
                 
@@ -27,6 +28,8 @@
                     editor.setMap(MapGenerator.unshift(map));
                     editMapTab.checked = true;
                 })
+
+                const history = new MapHistoryView(practicer.history, document.querySelector("#map-history"))
             })
         </script>
     </head>
@@ -48,31 +51,35 @@
                     <div class="wrapper">
                         <canvas width="1800" height="1800"></canvas>
                     </div>
-                    <div class="controls">
-                        <button type="button" id="newMap">🔄</button>
-                        <button type="button" id="undoMove">↩️</button>
-                        <button type="button" id="unveilMap">👁️</button>
-                        <button type="button" id="screenshotMap">📸</button>
-                        <button type="button" id="shareMap">🤝</button>
-                        <button type="button" id="openEdit">📝</button>
-                    </div>
-                    <div class="stats">
-                        <div>
-                            <h2>Session Stats</h2>
-                            <div>Pots: <span id="sessionPots">0</span></div>
-                            <div>Defenders: <span id="sessionDefenders">0</span></div>
-                            <div>Pot Ratio: <span id="sessionRatio">No Defenders</span></div>
+                    <div class="panel">
+                        <div class="controls">
+                            <button type="button" id="newMap">🔄</button>
+                            <button type="button" id="undoMove">↩️</button>
+                            <button type="button" id="unveilMap">👁️</button>
+                            <button type="button" id="screenshotMap">📸</button>
+                            <button type="button" id="shareMap">🤝</button>
+                            <button type="button" id="openEdit">📝</button>
+                            <input type="checkbox" id="favoriteMap" style="display: none">
+                            <label for="favoriteMap">⭐</label>
                         </div>
-                        <div>
-                            <h2>All Time Stats</h2>
-                            <div>Pots: <span id="lifetimePots">0</span></div>
-                            <div>Defenders: <span id="lifetimeDefenders">0</span></div>
-                            <div>Pot Ratio: <span id="lifetimeRatio">No Defenders</span></div>
+                        <div class="stats">
+                            <div>
+                                <h2>Session Stats</h2>
+                                <div><div>Pots:</div><div class="stat" id="sessionPots">0</div></div>
+                                <div><div>Defenders:</div><div class="stat" id="sessionDefenders">0</div></div>
+                                <div><div>Pot Ratio:</div><div class="stat" id="sessionRatio">No Defenders</div></div>
+                            </div>
+                            <div>
+                                <h2>All Time Stats</h2>
+                                <div><div>Pots:</div><div class="stat" id="lifetimePots">0</div></div>
+                                <div><div>Defenders:</div><div class="stat" id="lifetimeDefenders">0</div></div>
+                                <div><div>Pot Ratio:</div><div class="stat" id="lifetimeRatio">No Defenders</div></div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="tab-content">
+            <div class="tab-content" id="map-history">
                 
             </div>
             <div class="tab-content">

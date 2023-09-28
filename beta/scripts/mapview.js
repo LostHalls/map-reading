@@ -312,6 +312,9 @@ class MapPracticeView {
     /** @type {HTMLDivElement} */
     #container;
 
+    /** @type {HTMLInputElement} */
+    #favoritesButton;
+
     /** @type {MapView} */
     #map;
 
@@ -402,8 +405,18 @@ class MapPracticeView {
             this.#emitter.dispatchEvent(event);
         })
 
-        this.#map.setMap(this.#history.current);
-        this.#map.draw();
+        this.#favoritesButton = this.#container.querySelector("#favoriteMap");
+        this.#favoritesButton.addEventListener('change', () => {
+            if (this.#favoritesButton.checked) this.#history.addFavorite(MapGenerator.serialize(this.#map.map));
+            else this.#history.removeFavorite(MapGenerator.serialize(this.#map.map));
+        })
+
+        this.#history.on("favorite", event => {
+            if (event.map != MapGenerator.serialize(this.#map.map)) return;
+            this.#favoritesButton.checked = event.favorited;
+        });
+
+        this.setMap(this.#history.current);
     }
 
     copyMapLink() {
@@ -426,30 +439,34 @@ class MapPracticeView {
         //if this isn't visible, make sure not to process events
         if (!this.#container.offsetParent) return;
 
-        event.preventDefault();
-
         switch (event.key.toUpperCase()) {
             case this.#settings.get("Up 1").toUpperCase():
             case this.#settings.get("Up 2").toUpperCase():
+                event.preventDefault();
                 this.#map.up();
                 break;
             case this.#settings.get("Left 1").toUpperCase():
             case this.#settings.get("Left 2").toUpperCase():
+                event.preventDefault();
                 this.#map.left();
                 break;
             case this.#settings.get("Right 1").toUpperCase():
             case this.#settings.get("Right 2").toUpperCase():
+                event.preventDefault();
                 this.#map.right();
                 break;
             case this.#settings.get("Down 1").toUpperCase():
             case this.#settings.get("Down 2").toUpperCase():
+                event.preventDefault();
                 this.#map.down();
                 break;
             case this.#settings.get("New Map 1").toUpperCase():
             case this.#settings.get("New Map 2").toUpperCase():
+                event.preventDefault();
                 this.newMap();
                 break;
             case 'Backspace':
+                event.preventDefault();
                 this.#map.reverse();
                 break;
         }
@@ -502,13 +519,16 @@ class MapPracticeView {
 
     newMap() {
         this.#history.fresh();
-        this.#map.setMap(this.#history.current);
-        this.#map.draw();
+        this.setMap(this.#history.current);
     }
 
-
+    /**
+     * 
+     * @param {MapTile[][]} map 
+     */
     setMap(map) {
         this.#map.setMap(map);
+        this.#favoritesButton.checked = this.#history.favorited(MapGenerator.serialize(map));
         this.#draw();
     }
 
@@ -792,5 +812,75 @@ class MapEditView {
         const map = MapGenerator.emptyMap();
         map[4][4] = MapTile.getRoomNumber({up: false, right: false, down: false, left: false, spawn: true, pots: false, defender: false});
         this.#map.setMap(MapGenerator.of(map));
+    }
+}
+
+class MapHistoryView {
+    /** @type {MapHistory} */
+    #history;
+
+    /** @type {HTMLDivElement} */
+    #container;
+
+    /**
+     * 
+     * @param {MapHistory} history 
+     * @param {HTMLDivElement} view 
+     */
+    constructor(history, view) {
+        this.#history = history;
+        this.#container = view;
+
+        this.#history.on("history", () => this.populate());
+        this.populate();
+    }
+
+    populate() {
+        console.log('populated')
+        const favoritesList = document.createElement('ul');
+        favoritesList.innerHTML = `<li><h1>Favorited Maps</h1></li>`;
+
+        const historyList = document.createElement('ul');
+        historyList.innerHTML = `<li><h1>Map History</h1></li>`;
+
+        const buildListItem = (map, parent) => {
+            const item = document.createElement('li');
+            const link = window.location.href.replace(window.location.search, "") + '?map=' + map;
+            const favBtn = document.createElement('input');
+            favBtn.type = "checkbox";
+            favBtn.style.display = "none";
+            favBtn.checked = this.#history.favorited(map);
+            favBtn.id = map + (parent == favoritesList ? '-fav-btn-a' : 'fav-btn-b');
+            favBtn.classList.add('fav-button');
+            favBtn.addEventListener('click', () => {
+                if (favBtn.checked) this.#history.addFavorite(map);
+                else this.#history.removeFavorite(map);
+            })
+
+            const favLbl = document.createElement('label');
+            favLbl.setAttribute('for', favBtn.id);
+            favLbl.classList.add('fav-label');
+            favLbl.textContent = '⭐';
+            let span = document.createElement('span');
+            span.appendChild(favBtn);
+            span.appendChild(favLbl);
+            item.appendChild(span);
+            span = document.createElement('span');
+            span.innerHTML = `<a href="${link}">${map}</a>`;
+            item.appendChild(span);
+            
+            parent.appendChild(item);   
+        }
+
+        this.#history.favorites.forEach(map => {
+            buildListItem(map, favoritesList);
+        })
+
+        this.#history.history.forEach(map => {
+            buildListItem(map, historyList);
+        })
+
+        this.#container.replaceChildren(favoritesList);
+        this.#container.appendChild(historyList);
     }
 }

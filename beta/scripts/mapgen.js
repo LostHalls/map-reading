@@ -166,6 +166,7 @@ class MapGenerator {
     static serialize(map) {
         let arr = map.flat().map(v => String.fromCharCode(v.serialize() + 65));
         let out = [];
+        
         while (arr.length) {
             let count = 1;
             let char = arr.shift();
@@ -185,6 +186,7 @@ class MapGenerator {
      * @returns {MapTile[][]}
      */
     static deserialize(str) {
+        const favorited = str.startsWith('!');
         str = str.match(/(\d*\w)/gi).reduce((s, c) => s + (c.length == 1 ? c : c[c.length - 1].repeat(c.match(/\d+/)[0])), "");
         const arr = [];
         while (str) {
@@ -741,13 +743,30 @@ class MapGenerator {
 
 
 class MapHistory {
+    /** @type {MapGenerator} */
     #generator = new MapGenerator();
+
+    /** @type {number} */
     #pos = 0;
+
+    /** @type {string[]} */
     #history = [];
-    /** 
-     * @type {MapTile[][]}
-     */
+
+    #favorites = [];
+
+    /** @type {MapTile[][]} */
     #current;
+
+    /** @type {EventTarget} */
+    #emitter = new EventTarget;
+
+    on(eventName, listener) {
+        this.#emitter.addEventListener(eventName, listener);
+    }
+
+    off(eventName, listener) {
+        this.#emitter.removeEventListener(eventName, listener);
+    }
 
     constructor(map) {
         this.#load();
@@ -763,6 +782,7 @@ class MapHistory {
         this.#history = this.#history.filter(map => map != serialized);
         this.#history.unshift(serialized);
         this.#save();
+        this.#emitter.dispatchEvent(new Event("history"));
     }
 
     fresh() {
@@ -777,6 +797,7 @@ class MapHistory {
         if (n >= this.#history.length -1) n = this.#history.length - 1;
         this.#pos = n;
         this.#current = MapGenerator.deserialize(this.#history[this.#pos]);
+        this.#writeHistory();
         return this.#current;
     }
 
@@ -800,11 +821,55 @@ class MapHistory {
         return [...this.#history];
     }
 
+    get favorites() {
+        return [...this.#favorites];
+    }
+
     #load() {
         this.#history = JSON.parse(localStorage.getItem("map-history") || "[]");
+        this.#favorites = JSON.parse(localStorage.getItem("map-history-favorites") || "[]");
+        this.#emitter.dispatchEvent(new Event("history"));
     }
 
     #save() {
         localStorage.setItem("map-history", JSON.stringify(this.#history));
+        localStorage.setItem("map-history-favorites", JSON.stringify(this.#favorites));
+    }
+
+    /**
+     * 
+     * @param {string} map serialized map
+     * @returns 
+     */
+    favorited(map) {
+        return this.#favorites.includes(map);
+    }
+
+    /**
+     * 
+     * @param {string} map 
+     */
+    addFavorite(map) {
+        if (!this.favorited(map)) {
+            this.#favorites.push(map);
+            this.#save();
+            this.#emitter.dispatchEvent(new Event("history"));
+            const event = new Event("favorite");
+            event.favorited = true;
+            event.map = map;
+            this.#emitter.dispatchEvent(event);
+        }
+    }
+
+    removeFavorite(map) {
+        if (this.favorited(map)) { 
+            this.#favorites.splice(this.#favorites.indexOf(map), 1);
+            this.#save();
+            this.#emitter.dispatchEvent(new Event("history"));
+            const event = new Event("favorite");
+            event.favorited = false;
+            event.map = map;
+            this.#emitter.dispatchEvent(event);
+        }
     }
 }
