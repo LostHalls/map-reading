@@ -752,7 +752,11 @@ class MapHistory {
     /** @type {string[]} */
     #history = [];
 
+    /** @type {string[]} */
     #favorites = [];
+
+    /** @type {string[]} */
+    #names = {};
 
     /** @type {MapTile[][]} */
     #current;
@@ -779,10 +783,17 @@ class MapHistory {
     #writeHistory() {
         this.#pos = 0;
         const serialized = MapGenerator.serialize(this.#current);
+        const length = this.#history.length;
         this.#history = this.#history.filter(map => map != serialized);
         this.#history.unshift(serialized);
+        const event = new Event(length == this.#history.length ? "moved" : "added");
+        event.map = serialized;
+        if (length != this.#history.length && this.#history.length > 400) {
+            const removed = this.#history.splice(400, this.#history.length - 400);
+            event.removed = removed;
+        }
         this.#save();
-        this.#emitter.dispatchEvent(new Event("history"));
+        this.#emitter.dispatchEvent(event);
     }
 
     fresh() {
@@ -828,12 +839,13 @@ class MapHistory {
     #load() {
         this.#history = JSON.parse(localStorage.getItem("map-history") || "[]");
         this.#favorites = JSON.parse(localStorage.getItem("map-history-favorites") || "[]");
-        this.#emitter.dispatchEvent(new Event("history"));
+        this.#names = JSON.parse(localStorage.getItem("map-history-names") || "{}")
     }
 
     #save() {
         localStorage.setItem("map-history", JSON.stringify(this.#history));
         localStorage.setItem("map-history-favorites", JSON.stringify(this.#favorites));
+        localStorage.setItem("map-history-names", JSON.stringify(this.#names));
     }
 
     /**
@@ -853,11 +865,10 @@ class MapHistory {
         if (!this.favorited(map)) {
             this.#favorites.push(map);
             this.#save();
-            this.#emitter.dispatchEvent(new Event("history"));
-            const event = new Event("favorite");
-            event.favorited = true;
-            event.map = map;
-            this.#emitter.dispatchEvent(event);
+            const favoriteEvent = new Event("favorite");
+            favoriteEvent.favorited = true;
+            favoriteEvent.map = map;
+            this.#emitter.dispatchEvent(favoriteEvent);
         }
     }
 
@@ -865,11 +876,44 @@ class MapHistory {
         if (this.favorited(map)) { 
             this.#favorites.splice(this.#favorites.indexOf(map), 1);
             this.#save();
-            this.#emitter.dispatchEvent(new Event("history"));
+
             const event = new Event("favorite");
             event.favorited = false;
             event.map = map;
             this.#emitter.dispatchEvent(event);
         }
+    }
+
+    remove(map) {
+        this.#history = this.#history.filter(m2 => map !== m2);
+        this.#save();
+        const event = new Event("removed");
+        event.map = map;
+        event.removed = true;
+        this.#emitter.dispatchEvent(event);
+    }
+
+    clear() {
+        const map = MapGenerator.serialize(this.#current);
+        this.#history = [map];
+        this.#save();
+        const event = new Event("cleared");
+        event.map = map;
+        this.#emitter.dispatchEvent(event);
+    }
+
+    
+    nameFor(map) {
+        return this.#names[map];
+    }
+
+    setName(map, name) {
+        if (!name) delete this.#names[map];
+        else this.#names[map] = name;
+        this.#save();
+        const event = new Event('rename');
+        event.map = map;
+        event.name = name;
+        this.#emitter.dispatchEvent(event);
     }
 }

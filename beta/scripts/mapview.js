@@ -100,11 +100,11 @@ class MapView {
     }
 
     /** @type {MapPaintOptions?} */
-    paintOptions;
+    paintOptions = {};
 
     /**
      * 
-     * @param {MapPainOptions?} options 
+     * @param {MapPaintOptions?} options 
      */
     draw(options) {
         this.#emitter.dispatchEvent(new Event("predraw"));
@@ -266,7 +266,6 @@ class MapView {
      * Key Events
      */
     up() {
-        console.log('up')
         if (this.selectedTile.up)
         {
             this.#cursorHistory.push(this.#cursor.add(-1, 0));
@@ -320,6 +319,9 @@ class MapPracticeView {
 
     /** @type {MapHistory} */
     #history;
+
+    /** @type {boolean} */
+    #revealed = false;
 
     /**
      * @returns {MapHistory}
@@ -417,18 +419,77 @@ class MapPracticeView {
         });
 
         this.setMap(this.#history.current);
+
+        const nameBar = this.#container.querySelector('.map-name');
+        nameBar.querySelector('span').textContent = this.#history.nameFor(MapGenerator.serialize(this.#map.map)) ?? 'Unnamed Map';
+        
+        nameBar.querySelector('#toggleEdit').addEventListener('click', () => {
+            const img = nameBar.querySelector('img');
+            const serialized = MapGenerator.serialize(this.#map.map);
+            const currentName = this.#history.nameFor(serialized);
+            if (nameBar.querySelector('span')) {
+                //move to edit mode
+                const span = nameBar.querySelector('span');
+
+                img.src = "resources/save.png";
+                img.alt = "💾";
+
+                const input = document.createElement('input');
+                input.type = "text";
+                input.value = currentName ?? "";
+                input.placeholder = "Name this map...";
+                input.spellcheck = false;
+
+                input.addEventListener('keypress', event => {
+                    if (event.key === 'Enter') {
+                        event.preventDefault();
+                        nameBar.querySelector('#toggleEdit').click();
+                    }
+                })
+
+                span.replaceWith(input);
+
+                input.focus();
+            } else {
+                const input = nameBar.querySelector('input');
+                const newName = input.value || null;
+
+                img.src = "resources/edit.png";
+                img.alt = "✏️";
+
+                const span = document.createElement('span');
+                span.textContent = newName ?? 'Unnamed Map';
+
+                input.replaceWith(span);
+
+                if (currentName != newName)
+                    this.#history.setName(serialized, newName);
+            }
+        })
+    }
+
+    get editingName() {
+        return !!this.#container.querySelector('.map-name input');
     }
 
     copyMapLink() {
-
+        const link = window.location.toString().replace(window.location.search, '') + `?map=${MapGenerator.serialize(this.#map.map)}`;
+        navigator.clipboard.writeText(link);
+        toast('Copied map link to clipboard');
     }
 
     toggleVisibility() {
-
+        this.#revealed = true;
+        this.#map.paintOptions.allRooms = !this.#map.paintOptions.allRooms;
+        this.#draw();
     }
 
     screenshot() {
-
+        const modal = document.querySelector('.modal');
+        const cvs = modal.querySelector('canvas');
+        const ctx = cvs.getContext('2d');
+        ctx.drawImage(this.#map.canvas, 0, 0);
+        modal.style.display = "block";
     }
 
     /**
@@ -437,7 +498,7 @@ class MapPracticeView {
      */
     #keyListener(event) {
         //if this isn't visible, make sure not to process events
-        if (!this.#container.offsetParent) return;
+        if (!this.#container.offsetParent || this.editingName) return;
 
         switch (event.key.toUpperCase()) {
             case this.#settings.get("Up 1").toUpperCase():
@@ -528,6 +589,7 @@ class MapPracticeView {
      */
     setMap(map) {
         this.#map.setMap(map);
+        this.#revealed = false;
         this.#favoritesButton.checked = this.#history.favorited(MapGenerator.serialize(map));
         this.#draw();
     }
@@ -590,7 +652,7 @@ class MapEditView {
 
         this.#map.on("predraw", () => {
             const serialized = MapGenerator.serialize(this.#map.map);
-            this.#container.querySelector("#showInBrowser").href = window.location.toString().replace(window.location.search, `?map=${serialized}`);
+            this.#container.querySelector("#showInBrowser").href = window.location.toString().replace(window.location.search, '') + `?map=${serialized}`;
         });
 
         this.#container.querySelector("#reset").addEventListener('click', () => this.newMap());
@@ -822,6 +884,12 @@ class MapHistoryView {
     /** @type {HTMLDivElement} */
     #container;
 
+    /** @type {HTMLUListElement} */
+    #favoritesList;
+
+    /** @type {HTMLUListElement} */
+    #historyList;
+
     /**
      * 
      * @param {MapHistory} history 
@@ -831,56 +899,123 @@ class MapHistoryView {
         this.#history = history;
         this.#container = view;
 
-        this.#history.on("history", () => this.populate());
-        this.populate();
+        this.#populate();
+
+        this.#applyListeners();
     }
 
-    populate() {
-        console.log('populated')
-        const favoritesList = document.createElement('ul');
-        favoritesList.innerHTML = `<li><h1>Favorited Maps</h1></li>`;
+    #populate() {
+        this.#favoritesList = document.createElement('ul');
+        
+        this.#favoritesList.innerHTML = `<li><h1>Favorited Maps</h1></li>`;
+        this.#favoritesList.id = "favorites";
+        
+        this.#historyList = document.createElement('ul');
 
-        const historyList = document.createElement('ul');
-        historyList.innerHTML = `<li><h1>Map History</h1></li>`;
+        this.#historyList.id = "history";
+        this.#historyList.innerHTML = `<li><h1>Map History</h1></li>`;
 
-        const buildListItem = (map, parent) => {
-            const item = document.createElement('li');
-            const link = window.location.href.replace(window.location.search, "") + '?map=' + map;
-            const favBtn = document.createElement('input');
-            favBtn.type = "checkbox";
-            favBtn.style.display = "none";
-            favBtn.checked = this.#history.favorited(map);
-            favBtn.id = map + (parent == favoritesList ? '-fav-btn-a' : 'fav-btn-b');
-            favBtn.classList.add('fav-button');
-            favBtn.addEventListener('click', () => {
-                if (favBtn.checked) this.#history.addFavorite(map);
-                else this.#history.removeFavorite(map);
-            })
-
-            const favLbl = document.createElement('label');
-            favLbl.setAttribute('for', favBtn.id);
-            favLbl.classList.add('fav-label');
-            favLbl.textContent = '⭐';
-            let span = document.createElement('span');
-            span.appendChild(favBtn);
-            span.appendChild(favLbl);
-            item.appendChild(span);
-            span = document.createElement('span');
-            span.innerHTML = `<a href="${link}">${map}</a>`;
-            item.appendChild(span);
-            
-            parent.appendChild(item);   
-        }
 
         this.#history.favorites.forEach(map => {
-            buildListItem(map, favoritesList);
+            this.#favoritesList.appendChild(this.#buildListItem(map, this.#favoritesList));
         })
 
         this.#history.history.forEach(map => {
-            buildListItem(map, historyList);
+            this.#historyList.appendChild(this.#buildListItem(map, this.#historyList));
+        })
+        const clearItem = document.createElement('li');
+        clearItem.innerHTML = /*html*/`
+            <button type="button" id="clear-history-btn">Clear History</button>    
+        `;
+        clearItem.querySelector('#clear-history-btn').addEventListener('click', () => this.#history.clear())
+        
+        this.#historyList.appendChild(clearItem);
+        this.#container.replaceChildren(this.#favoritesList);
+        this.#container.appendChild(this.#historyList);
+
+        this.#historyList.querySelector("#clear-history-btn").textContent = `Clear History (${this.#history.history.length})`;
+    }
+
+    #buildListItem(map, parent) {
+        const item = document.createElement('li');
+        const link = window.location.href.replace(window.location.search, "") + '?map=' + map;
+        const baseId = `${parent == this.#favoritesList ? 'favorite' : 'history'}-${map}`
+        const favBtnID = baseId + '-fav-btn';
+        item.id = baseId;
+        item.innerHTML = /*html*/`
+            <span>
+                <input type="checkbox" class="fav-button" id="${favBtnID}" ${this.#history.favorited(map) && 'checked'}>
+                <label for="${favBtnID}" class="fav-label" >⭐</label>
+            </span>
+            <a href="${link}">${this.#history.nameFor(map) ?? map}</a>
+        `;
+
+        if (parent == this.#historyList) {
+            item.innerHTML += /*html*/`<span><button type="button" class="deleteHistoryItem">➖</button></span>`;
+            const deleteBtn = item.querySelector(`.deleteHistoryItem`);
+            deleteBtn.addEventListener('click', () => {
+                this.#history.remove(map);
+            })
+        }
+
+        const favBtn = item.querySelector(`.fav-button`);
+
+        favBtn.addEventListener('click', () => {
+            if (favBtn.checked) this.#history.addFavorite(map);
+            else this.#history.removeFavorite(map);
         })
 
-        this.#container.replaceChildren(favoritesList);
-        this.#container.appendChild(historyList);
+        return item;  
+    }
+
+    #applyListeners() {
+        this.#history.on("moved", event => {
+            const elem = this.#historyList.querySelector(`#history-${event.map}`);
+            this.#historyList.removeChild(elem);
+            this.#historyList.firstChild.after(elem);
+        })
+
+        this.#history.on("added", event => {
+            this.#historyList.firstChild.after(this.#buildListItem(event.map, this.#historyList));
+            if (event.removed) {
+                for (const map of event.removed) {
+                    const elem = this.#historyList.querySelector(`#history-${map}`);
+                    this.#historyList.removeChild(elem);
+                }
+            }
+            this.#historyList.querySelector("#clear-history-btn").textContent = `Clear History (${this.#history.history.length})`;
+        })
+
+        this.#history.on("removed", event => {
+            const elem = this.#historyList.querySelector(`#history-${event.map}`);
+            this.#historyList.removeChild(elem);
+            this.#historyList.querySelector("#clear-history-btn").textContent = `Clear History (${this.#history.history.length})`;
+        })
+
+        this.#history.on("favorite", event => {
+            if (event.favorited)  this.#favoritesList.appendChild(this.#buildListItem(event.map, this.#favoritesList));
+            else {
+                const elem = this.#favoritesList.querySelector(`#favorite-${event.map}`);
+                this.#favoritesList.removeChild(elem);
+            }
+        })
+
+        this.#history.on("cleared", event => {
+            const elem = this.#historyList.querySelector(`#history-${event.map}`)
+            this.#historyList.replaceChildren(this.#historyList.firstChild, elem, this.#historyList.lastChild);
+            this.#historyList.querySelector("#clear-history-btn").textContent = `Clear History (${this.#history.history.length})`;
+        })
+
+        this.#history.on('rename', event => {
+            const helem = this.#historyList.querySelector(`#history-${event.map}`);
+            if (helem) {
+                helem.querySelector('a').textContent = this.#history.nameFor(event.map) || event.map;
+            }
+
+            const felem = this.#favoritesList.querySelector(`#favorite-${event.map}`);
+            if (felem) {
+                felem.querySelector('a').textContent = this.#history.nameFor(event.map) || event.map;
+            }
+        })
     }
 }

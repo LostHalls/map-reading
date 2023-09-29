@@ -14,15 +14,9 @@ New features once beta is completed include:
 - Correct button and stats layouts on map practice
 - Troom dot on 4flame & after pot hit
 - Make sure shifts are always applied correctly
-- Screenshot map
-- Copy map to clipboard
-- Make map visible
 - Stats integrations
 - Add DPad
 - Add change highlight color buttons
-
-### History
-- Ability to name maps in history
 
 ### Map Editor
 - Make defender not placeable if bleeds out of map

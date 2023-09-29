@@ -3,24 +3,40 @@
     border-left: 1px solid #ccc;
     border-right: 1px solid #ccc;
     border-bottom: 1px solid #ccc;
+    display: flex;
+    vertical-align: middle;
+
 }
 
-#map-history li:nth-child(2n) {
+#map-history li:nth-child(2n+1) {
     background-color: #eee;
 }
 #map-history li:hover {
     background-color: #ddd;
+}
+#map-history li span {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 #map-history ul {
     margin: 16px auto;
     width: 90%;
     padding-inline-start: 0px;
+    vertical-align: middle;
 }
 #map-history li:first-child {
     border-top: 1px solid #ccc;
     border-top-left-radius: 4px;
     border-top-right-radius: 4px;
+    background-color: #88CDF6;
+    color: #222;
+    text-align: center;
+}
+
+#map-history li:first-child * {
+    margin: .67em auto;
 }
 
 #map-history li:last-child {
@@ -33,17 +49,48 @@
     overflow-wrap: break-word;
     display: inline-block;
     height: 100%;
-    width: calc(100% - 3em - 26px);
+    width: calc(100% - 3em - 66px);
     padding: 8px 13px;
 }
 
 .fav-label {
-    display: inline-block;
     font-size: 2em;
-    height: 100%;
+    cursor: pointer;
+}
+.fav-button {
+    display: none;
+}
+.fav-button:not(:checked) ~ .fav-label {
+    filter: grayscale(1);
+}
+
+.deleteHistoryItem {
+    all: unset;
+    color: rgba(0,0,0,0);
+    text-shadow: 0 0 red;
+    font-size: 1.4em;
+    font-weight: 800;
+    width: 40px;
+    text-align: right;
     cursor: pointer;
 }
 
-.fav-button:not(:checked) ~ .fav-label {
-    filter: grayscale(1);
+#clear-history-btn {
+    all: unset;
+    width: 100%;
+    text-align: center;
+    height: 56px;
+    font-weight: 600;
+    background-color: #FF6961;
+    font-size: 1.4em;
+    color: #111;
+    cursor: pointer;
+}
+
+#clear-history-btn:hover {
+    background-color: #ff5148;
+}
+
+#clear-history-btn:active {
+    background-color: #c30a00;
 }

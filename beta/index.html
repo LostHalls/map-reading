@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
     <head>
+        <script src="scripts/utils.js"></script>
         <script src="scripts/mapgen.js"></script>
         <script src="scripts/settings.js"></script>
         <script src="scripts/mapview.js"></script>
@@ -18,7 +19,7 @@
                 
                 const practiceMapTab = document.querySelector("#map-practice-tab");
                 const editMapTab = document.querySelector("#map-editor-tab");
-                
+                window.prac = practicer;
                 editor.on("map", ({ map }) => {
                     practicer.setMap(MapGenerator.shift(map));
                     practiceMapTab.checked = true;
@@ -29,7 +30,21 @@
                     editMapTab.checked = true;
                 })
 
+                practicer.history.on('favorite', event => {
+                    if (event.favorited) toast(`Added map to favorites`).style.backgroundColor = '#DAF7A6';
+                    else toast(`Removed map from favorites`).style.backgroundColor = '#FFC300';
+                })
+
+                practicer.history.on('cleared', () => toast('History cleared').style.backgroundColor = '#88CDF6');
+
                 const history = new MapHistoryView(practicer.history, document.querySelector("#map-history"))
+            
+                const screenshotModal = document.querySelector('.modal');
+                const modalClose = screenshotModal.querySelector('.close');
+                document.querySelector('.modal, .modal .close').addEventListener('click', event => {
+                    if (event.target == modalClose || event.target == screenshotModal)
+                    screenshotModal.style.display = "none";
+                })
             })
         </script>
     </head>
@@ -41,13 +56,14 @@
             <input type="radio" id="map-editor-tab" name="tab-radio">
             <input type="radio" id="settings-tab" name="tab-radio">
             <ul class="tab-header">
-                <li class="tab"><label for="map-practice-tab">Map Practice</label></li>
-                <li class="tab"><label for="map-history-tab">Map History</label></li>
-                <li class="tab"><label for="map-editor-tab">Map Editor</label></li>
+                <li class="tab"><label for="map-practice-tab">Practice</label></li>
+                <li class="tab"><label for="map-history-tab">History</label></li>
+                <li class="tab"><label for="map-editor-tab">Editor</label></li>
                 <li class="tab"><label for="settings-tab">Settings</label></li>
             </ul>
             <div class="tab-content">
                 <div class="map-view" id="practice-map">
+                    <div class="map-name"><button type="button" id="toggleEdit"><img src="resources/edit.png" alt="✏️" /></button><span>Unnamed Map</span></div>
                     <div class="wrapper">
                         <canvas width="1800" height="1800"></canvas>
                     </div>
@@ -102,6 +118,13 @@
             </div>
             <div class="tab-content">
                 <h-settings></h-settings>
+            </div>
+        </div>
+
+        <div class="modal">
+            <div class="modal-content">
+                <button class="close">&times;</button>
+                <canvas width="1800" height="1800"></canvas>
             </div>
         </div>
     </body>
