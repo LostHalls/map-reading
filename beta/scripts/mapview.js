@@ -1,3 +1,72 @@
+class Stats {
+    #localPots = 0;
+    #localDefenders = 0;
+
+    #globalPots = 0;
+    #globalDefenders = 0;
+
+    constructor() {
+        this.#load();
+    }
+
+    #load() {
+        const obj = JSON.parse(localStorage.getItem('stats')) ?? { pots: 0, defenders: 0 };
+        this.#localPots = 0;
+        this.#localDefenders = 0;
+        this.#globalPots = obj.pots;
+        this.#globalDefenders = obj.defenders;
+    }
+
+    #save() {
+        localStorage.setItem('stats', JSON.stringify(this));
+    }
+
+    resetLocal() {
+        this.#localPots = 0;
+        this.#localDefenders = 0;
+    }
+
+    toJSON() {
+        return {
+            pots: this.#globalPots,
+            defenders: this.#globalDefenders
+        }
+    }
+
+    addPot() {
+        this.#localPots++;
+        this.#globalPots++;
+        this.#save();
+    }
+
+    addDefender() {
+        this.#localDefenders++;
+        this.#globalDefenders++;
+        this.#save();
+    }
+
+    get local() {
+        return {
+            pots: this.#localPots,
+            defenders: this.#localDefenders
+        }
+    }
+
+    get global() {
+        return {
+            pots: this.#globalPots,
+            defenders: this.#globalDefenders
+        }
+    }
+
+    get stats() {
+        return {
+            local: this.local,
+            global: this.global
+        }
+    }
+}
+
 class MapView {
     /** @type {HTMLDivElement} */
     #container;
@@ -312,37 +381,42 @@ class MapView {
     up() {
         if (this.selectedTile.up)
         {
-            this.#cursorHistory.push(this.#cursor.add(-1, 0));
-            this.selectedTile.touched = true;
-            this.draw();
+            this.move(this.#cursor.add(-1, 0));
         }
     }
 
     down() {
         if (this.selectedTile.down)
         {
-            this.#cursorHistory.push(this.#cursor.add(1, 0));
-            this.selectedTile.touched = true;
-            this.draw();
+            this.move(this.#cursor.add(1, 0));
+
         }
     }
 
     left() {
         if (this.selectedTile.left) {
-            this.#cursorHistory.push(this.#cursor.add(0, -1));
-            this.selectedTile.touched = true;
-            this.draw();
+            this.move(this.#cursor.add(0, -1));
+
         }
     }
 
     right() {
         if (this.selectedTile.right) {
-            this.#cursorHistory.push(this.#cursor.add(0, 1));
-            this.selectedTile.touched = true;
-            this.draw();
+            this.move(this.#cursor.add(0, 1));
         }
     }
     
+    move(location) {
+        this.#cursorHistory.push(location);
+        if (!this.selectedTile.touched) {
+            if (this.selectedTile.troom) this.#emitter.dispatchEvent(new Event('troom'));
+            if (this.selectedTile.defender) this.#emitter.dispatchEvent(new Event('defender'));
+            if (this.selectedTile.pot || this.selectedTile.troom) this.#emitter.dispatchEvent(new Event('pot'));
+        }
+        this.selectedTile.touched = true;
+        this.draw();
+    }
+
     reverse() {
         if (this.#cursorHistory.length > 1) {
             this.#cursorHistory.pop();
@@ -402,8 +476,14 @@ class MapPracticeView {
     /** @type {MapHistory} */
     #history;
 
+    /** @type {Stats} */
+    #stats;
+
     /** @type {boolean} */
     #revealed = false;
+
+    /** @type {boolean} */
+    #defenderFound = false;
 
     /**
      * @returns {MapHistory}
@@ -464,6 +544,9 @@ class MapPracticeView {
         this.#container = view;
         this.#map = new MapView(view);
         this.#history = new MapHistory(new URLSearchParams(window.location.search).get('map'));
+
+        this.#stats = new Stats();
+        this.#updateStats();
         
         document.addEventListener('keydown', event => this.#keyListener(event));
         this.#map.canvas.addEventListener('mousemove', event => this.#mousemove(event));
@@ -482,7 +565,26 @@ class MapPracticeView {
         this.#container.querySelector("#unveilMap").addEventListener('click', () => this.toggleVisibility());
         this.#container.querySelector("#screenshotMap").addEventListener('click', () => this.screenshot());
         this.#container.querySelector("#shareMap").addEventListener('click', () => this.copyMapLink());
-        
+        this.#container.querySelector("#resetLocalStats").addEventListener('click', () => {
+            this.#stats.resetLocal();
+            this.#updateStats();
+        })
+
+        this.#map.on('pot', () => {
+            if (!this.#revealed && !this.#defenderFound) {
+                this.#stats.addPot();
+                this.#updateStats();
+            }
+        })
+
+        this.#map.on('defender', () => {
+            if (!this.#revealed) {
+                this.#stats.addDefender();
+                this.#defenderFound = true;
+                this.#updateStats();
+            }
+        })
+
         this.#container.querySelector("#openEdit").addEventListener('click', () => {
             const event = new Event("edit");
             event.map = MapGenerator.deserialize(MapGenerator.serialize(this.#map.map));
@@ -565,6 +667,7 @@ class MapPracticeView {
 
     toggleVisibility() {
         this.#revealed = true;
+        this.#defenderFound = true;
         this.#map.paintOptions.allRooms = !this.#map.paintOptions.allRooms;
         this.#draw();
     }
@@ -575,6 +678,20 @@ class MapPracticeView {
         const ctx = cvs.getContext('2d');
         ctx.drawImage(this.#map.canvas, 0, 0);
         modal.style.display = "block";
+    }
+
+    #updateStats() {
+        const local = this.#container.querySelector('.stats .local');
+        const global = this.#container.querySelector('.stats .global');
+
+        local.querySelector('.pots').textContent = `${this.#stats.local.pots}`;
+        local.querySelector('.defenders').textContent = `${this.#stats.local.defenders}`;
+        local.querySelector('.ratio').textContent = this.#stats.local.defenders ? `${(this.#stats.local.pots/this.#stats.local.defenders).toFixed(2)}` : 'No Defenders';
+
+        global.querySelector('.pots').textContent = `${this.#stats.global.pots}`;
+        global.querySelector('.defenders').textContent = `${this.#stats.global.defenders}`;
+        global.querySelector('.ratio').textContent = this.#stats.global.defenders ? `${(this.#stats.global.pots/this.#stats.global.defenders).toFixed(2)}` : 'No Defenders';
+
     }
 
     /**
@@ -675,6 +792,7 @@ class MapPracticeView {
     setMap(map) {
         this.#map.setMap(map);
         this.#revealed = false;
+        this.#defenderFound = false;
         this.#favoritesButton.checked = this.#history.favorited(MapGenerator.serialize(map));
         this.#draw();
     }

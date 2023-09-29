@@ -12,9 +12,7 @@ New features once beta is completed include:
 
 ### Map Practice
 - Correct button and stats layouts on map practice
-- Troom dot on 4flame & after pot hit
 - Make sure shifts are always applied correctly
-- Stats integrations
 - Add DPad
 - Add change highlight color buttons
 
