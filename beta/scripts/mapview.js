@@ -866,7 +866,7 @@ class MapEditView {
         this.#container.querySelector("#toggleRight").addEventListener('click', () => this.#toggle('right'));
         this.#container.querySelector("#setDefender").addEventListener('click', () => this.#setDefender());
         this.#container.querySelector("#deleteRooms").addEventListener('click', () => this.#deleteRooms());
-
+        this.#container.querySelector("#setTroom").addEventListener('click', () => this.#setTroom());
         this.#container.querySelector("#mapLink").addEventListener('click', () => {
             const event = new Event("map");
             //essentially deep clone so that further edits in editor doesn't change practicer map
@@ -1005,15 +1005,68 @@ class MapEditView {
         this.#map.draw();
     }
 
-    #setDefender() {
-        if (this.#editorSelection.length != 1) {
+    #setTroom() {
+        if (this.#editorSelection.length > 1) {
             //TODO: TOAST: can only set exactly 1 room to defender
+            toast('Too many rooms selected').style.color = 'red';
             return;
         }
         
+        if (this.#editorSelection.length == 0) {
+            toast('Must have 1 room selected').style.color = 'red';
+            return;
+        }
+
         const selection = this.#editorSelection[0];
+    
+        if (!selection.pot && !selection.defender && !selection.troom) {
+            toast('Selected room cannot be defender').style.color = 'red';
+            return;
+        }
+        
+        if (!selection.down || selection.up + selection.left + selection.right) {
+            //TODO: TOAST: Must have exactly 1 path to defender
+            toast('Troom can only have a path downwards').style.color = 'red';
+            return;
+        }
+
+        const newTile = new MapTile(MapTile.getRoomNumber({
+            up: false,
+            right: false,
+            down: true,
+            left: false,
+            spawn: false, 
+            defender: false, 
+            pots: selection.troom,
+            troom: !selection.trooml
+        }), { x: selection.x, y: selection.y });
+        this.#map.map[selection.x][selection.y] = newTile;
+        this.#editorSelection[0] = newTile;
+        this.#map.draw();
+    }
+
+    #setDefender() {
+        if (this.#editorSelection.length > 1) {
+            //TODO: TOAST: can only set exactly 1 room to defender
+            toast('Too many rooms selected').style.color = 'red';
+            return;
+        }
+        
+        if (this.#editorSelection.length == 0) {
+            toast('Must have 1 room selected').style.color = 'red';
+            return;
+        }
+
+        const selection = this.#editorSelection[0];
+    
+        if (!selection.pot && !selection.defender && !selection.troom) {
+            toast('Selected room cannot be defender').style.color = 'red';
+            return;
+        }
+
         if (selection.up + selection.down + selection.left + selection.right != 1) {
             //TODO: TOAST: Must have exactly 1 path to defender
+            toast('The defender room must only have 1 path out of defender').style.color = 'red';
             return;
         }
         let center = new Point(selection.x, selection.y);
@@ -1026,8 +1079,8 @@ class MapEditView {
         let count = 0;
         for (let x = -1; x <= 1; x++) {
             for (let y = -1; y <= 1; y++) {
-                if (this.#map.map[center.x + x]?.[center.y + y]?.value && ++count > 1) {
-                    //TODO: TOAST: Not a valid 3x3
+                if (center.x + x > 8 || center.y + y > 8 || center.x + x < 0 || center.y + y < 0 || this.#map.map[center.x + x][center.y + y].value && ++count > 1) {
+                    toast(`Not enough room`).style.color = 'red';
                     return;
                 }
             }
@@ -1059,7 +1112,7 @@ class MapEditView {
             left: selection.left,
             spawn: false, 
             defender: !selection.defender, 
-            pots: false 
+            pots: selection.defender
         }), { x: selection.x, y: selection.y });
 
         this.#map.map[selection.x][selection.y] = newTile;

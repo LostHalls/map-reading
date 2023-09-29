@@ -17,9 +17,7 @@ New features once beta is completed include:
 - Add change highlight color buttons
 
 ### Map Editor
-- Make defender not placeable if bleeds out of map
 - Verify map button to confirm if it's a valid map
-- Add set troom button
 
 ### Settings
 - Implement Settings UI
