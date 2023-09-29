@@ -462,8 +462,11 @@ class MapPracticeView {
 
                 input.replaceWith(span);
 
-                if (currentName != newName)
+                if (currentName != newName) {
                     this.#history.setName(serialized, newName);
+                    if (newName) toast(`Map renamed to ${newName}`)
+                    else toast(`Name removed from map`)
+                }
             }
         })
     }
