@@ -5,7 +5,7 @@ class MapView {
     /** @type {HTMLCanvasElement} */
     #canvas;
 
-    /** @type {MapTile[][]} */
+    /** @type {MapTileView[][]} */
     #map;
 
     /** @type {Point[]} */
@@ -68,10 +68,15 @@ class MapView {
 
     /**
      * 
-     * @param {MapTile[][]} newMap 
+     * @param {MapTileView[][]} newMap 
      */
     setMap(newMap) {
         this.#map = newMap;
+
+        if (this.#showFlameAnimationFrameID) cancelAnimationFrame(this.#showFlameAnimationFrameID);
+        this.#showFlameAnimationFrameID = undefined;
+        this.#lowFlameStartTime = undefined;
+        this.#showTroomHint = false;
         outer:
         for (let i = 0; i < 9; i++) {
             for (let j = 0; j < 9; j++) {
@@ -82,7 +87,42 @@ class MapView {
                 }
             }
         }
+
+        this.#showTroomIfLowFlames();
+
         this.draw();
+    }
+
+    #lowFlameStartTime;
+    #showFlameAnimationFrameID;
+    #showTroomHint = false;
+    #showTroomIfLowFlames() {
+        if (!(this.paintOptions.troomHint ?? MapView.#defaultPaintOptions.troomHint)) return;
+
+        const missingCount = 5 - this.pots().length;
+        if (missingCount <= 0) return;
+
+        const animateTroomHint = ts => {
+            if (!this.#lowFlameStartTime) this.#lowFlameStartTime = ts;
+
+            const elapsed = ts - this.#lowFlameStartTime;
+            const blinkStep = Math.floor(elapsed / 700); //blink on/off every 700ms, 2 steps per pot missing
+
+            if (blinkStep >= missingCount * 2) {
+                this.#showFlameAnimationFrameID = undefined;
+                this.#lowFlameStartTime = undefined;
+                this.#showTroomHint = false;
+                return;
+            } 
+            if (!this.#showTroomHint && blinkStep % 2 == 0) this.#showTroomHint = true;
+            else if (this.#showTroomHint && blinkStep % 2 == 1) this.#showTroomHint = false;
+
+            this.draw();
+
+            this.#showFlameAnimationFrameID = requestAnimationFrame(animateTroomHint);
+        };
+
+        this.#showFlameAnimationFrameID = requestAnimationFrame(animateTroomHint);
     }
 
     static #colors = {
@@ -91,12 +131,14 @@ class MapView {
         room: 'gray',
         cursor: 'purple',
         hall: '#404040',
-        spawn: 'hsl(90, 100%, 50%)'
+        spawn: 'hsl(90, 100%, 50%)',
+        troom: 'pink'
     }
 
     /** @type {MapPaintOptions} */
     static #defaultPaintOptions = {
         cursor: true,
+        troomHint: true
     }
 
     /** @type {MapPaintOptions?} */
@@ -117,7 +159,6 @@ class MapView {
         const length = this.#canvas.width / 9;
         const shiftx = this.#map[8][0].border ? length / 2 : 0;
         const shifty = this.#map[0][8].border ? length / 2 : 0;
-
 
         for (let i = 0; i < 9; i++) {
             for (let j = 0; j < 9; j++) {
@@ -144,9 +185,14 @@ class MapView {
                 this.#drawTile(context, this.#map[i][j], rect, options);
             }
         }
+        if (options.troomHint && (this.#showTroomHint || this.pots(true).some(pot => pot.touched))) {
+            const troom = this.troom;
+            this.#drawCursor(context, troom.x * length + shiftx, troom.y * length + shifty, length, MapView.#colors.troom);
+        }
+
         if (options.cursor) {
             const currentTile = this.#map[this.#cursor.x][this.#cursor.y];
-            this.#drawCursor(context, currentTile.x * length + shiftx, currentTile.y * length + shifty, length);
+            this.#drawCursor(context, currentTile.x * length + shiftx, currentTile.y * length + shifty, length, MapView.#colors.cursor);
         }
 
         this.#emitter.dispatchEvent(new Event("postdraw"));
@@ -154,8 +200,7 @@ class MapView {
 
     /**
      * @param {CanvasRenderingContext2D} context
-     * @param {MapTile} tile
-     * @param {string} [tile.highlight]
+     * @param {MapTileView} tile
      * @param {TileRect} rect
      * @param {MapPaintOptions} options
      */
@@ -175,8 +220,7 @@ class MapView {
 
     /**
      * @param {CanvasRenderingContext2D} context
-     * @param {MapTile} tile
-     * @param {string} [tile.highlight]
+     * @param {MapTileView} tile
      * @param {TileRect} rect
      * @param {MapPaintOptions} options
      */
@@ -235,8 +279,8 @@ class MapView {
      * @param {CanvasRenderingContext2D} context 
      * @param {*} rect 
      */
-    #drawCursor(context, x, y, length) {
-        context.fillStyle = MapView.#colors.cursor;
+    #drawCursor(context, x, y, length, color) {
+        context.fillStyle = color;
         context.beginPath();
         context.arc(y + length/2, x + length / 2, 14, 0, 2 * Math.PI);
         context.fill();
@@ -244,7 +288,7 @@ class MapView {
     /**
      * 
      * @param {*} context 
-     * @param {MapTile} tile 
+     * @param {MapTileView} tile 
      * @param {*} rect 
      */
     #drawIdentifier(context, tile, rect) {
@@ -256,7 +300,7 @@ class MapView {
         
     }
     /**
-     * @returns {MapTile}
+     * @returns {MapTileView}
      */
     get selectedTile() { 
         return this.#map[this.#cursor.x][this.#cursor.y];
@@ -269,6 +313,7 @@ class MapView {
         if (this.selectedTile.up)
         {
             this.#cursorHistory.push(this.#cursor.add(-1, 0));
+            this.selectedTile.touched = true;
             this.draw();
         }
     }
@@ -277,6 +322,7 @@ class MapView {
         if (this.selectedTile.down)
         {
             this.#cursorHistory.push(this.#cursor.add(1, 0));
+            this.selectedTile.touched = true;
             this.draw();
         }
     }
@@ -284,6 +330,7 @@ class MapView {
     left() {
         if (this.selectedTile.left) {
             this.#cursorHistory.push(this.#cursor.add(0, -1));
+            this.selectedTile.touched = true;
             this.draw();
         }
     }
@@ -291,6 +338,7 @@ class MapView {
     right() {
         if (this.selectedTile.right) {
             this.#cursorHistory.push(this.#cursor.add(0, 1));
+            this.selectedTile.touched = true;
             this.draw();
         }
     }
@@ -304,6 +352,40 @@ class MapView {
 
     get map() {
         return this.#map;
+    }
+
+    get defender() {
+        for (const row of this.#map) {
+            for (const cell of row) {
+                if (cell.defender) return cell;
+            }
+        }
+    }
+
+    get spawn() {
+        for (const row of this.#map) {
+            for (const cell of row) {
+                if (cell.spawn) return cell;
+            }
+        }   
+    }
+
+    get troom() {
+        for (const row of this.#map) {
+            for (const cell of row) {
+                if (cell.troom) return cell;
+            }
+        }
+    }
+
+    pots(includeTroom=false) {
+        const pots = [];
+        for (const row of this.#map) {
+            for (const cell of row) {
+                if (cell.pot || (cell.troom && includeTroom)) pots.push(cell);
+            }
+        }
+        return pots;
     }
 }
 
@@ -615,6 +697,7 @@ class MapEditView {
     /** @type {MapPaintOptions} */
     #drawOptions = {
         cursor: false,
+        troomHint: false,
         allRooms: true,
         forceHighlight: {
             color: 'white',

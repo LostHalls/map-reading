@@ -1,36 +1,3 @@
-
-/**
- * @typedef { "string" | "number" | "boolean" | "color" | "keybind" } SettingTypeName
- * @typedef { string | number | boolean } SettingType
- * 
- * @typedef {{
- *  displayName: string,
- *  defaultValue: SettingType,
- *  key: string,
- *  currentValue?: SettingType,
- *  type?: SettingTypeName,
- * }} SettingsUIItem
- * 
- * @typedef {{ 
- *  x: number,
- *  y: number,
- *  shiftx: number,
- *  shifty: number,
- *  length: number
- * }} TileRect
- * 
- * @typedef {{
- *  color: string,
- *  filter: function(MapTile): boolean
- * }} ForceHighlightOptions
- * 
- * @typedef {{
- *  cursor: boolean?,
- *  allRooms: boolean?,
- *  forceHighlight: ForceHighlightOptions?
- * }} MapPaintOptions
- */
-
 function assert(expr, message) {
     if(!Boolean(expr)) {
       throw new Error(message || 'unknown assertion error');

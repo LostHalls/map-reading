@@ -1,3 +1,43 @@
+/**
+ * @typedef { "string" | "number" | "boolean" | "color" | "keybind" } SettingTypeName
+ * @typedef { string | number | boolean } SettingType
+ * 
+ * @typedef {{
+*  displayName: string,
+*  defaultValue: SettingType,
+*  key: string,
+*  currentValue?: SettingType,
+*  type?: SettingTypeName,
+* }} SettingsUIItem
+* 
+* @typedef {{ 
+*  x: number,
+*  y: number,
+*  shiftx: number,
+*  shifty: number,
+*  length: number
+* }} TileRect
+* 
+* @typedef {{
+*  color: string,
+*  filter: function(MapTile): boolean
+* }} ForceHighlightOptions
+* 
+* @typedef {{
+*  cursor: boolean?,
+*  allRooms: boolean?,
+*  troomHint: boolean?,
+*  forceHighlight: ForceHighlightOptions?
+* }} MapPaintOptions
+* 
+* @typedef {{
+*   highlight?: string,
+*   touched?: boolean 
+* }} MapViewOptions
+*
+* @typedef {MapTile & MapViewOptions} MapTileView
+*/
+
 function toast(content) {
     const current = document.querySelectorAll('.toast');
     current.forEach(node => {
