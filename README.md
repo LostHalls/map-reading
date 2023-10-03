@@ -12,6 +12,7 @@ New features once beta is completed include:
 
 ### Map Practice
 - Correct button and stats layouts on map practice
+- Correct map name not changing on #newMap click
 - Make sure shifts are always applied correctly
 - Add DPad
 - Add change highlight color buttons
