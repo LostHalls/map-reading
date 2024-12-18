@@ -269,6 +269,7 @@ class Settings {
         this.cursor = new Setting("Visual", "color", "cursor", "Cursor Color", "#800080");
         this.highlight1 = new Setting("Visual", "color", "highlight1", "Highlight 1 (left-click)", "#00FFFF");
         this.highlight2 = new Setting("Visual", "color", "highlight2", "Highlight 2 (right-click)", "#FFD700");
+        this.highlight3 = new Setting("Visual", "color", "highlight3", "Highlight 3 (shift + left-click)", "#FF0000");
         this.bordercol = new Setting("Visual", "color", "bordercol", "Cutoff & Shift Color", "#1a1a1a");
     }
 
@@ -833,15 +834,20 @@ class LHMap {
         var maxy = shifty ? 7 : 8;
         if (px > maxx || py > maxy || px < 0 || py < 0)
             return;
-        if (e.buttons == 1) {
+        if (e.buttons == 1 && e.shiftKey) {
+            if (this.map.rooms[py][px].highlight != LHMap.settings.highlight3.value) {
+                this.map.highlight = LHMap.settings.highlight3.value
+            } else
+                this.map.highlight = false;
+        } else if (e.buttons == 1) {
             if (this.map.rooms[py][px].highlight != LHMap.settings.highlight1.value) {
                 this.map.highlight = LHMap.settings.highlight1.value;
             } else
                 this.map.highlight = false;
         } else if (e.buttons == 2) {
-            if (this.map.rooms[py][px].highlight != LHMap.settings.highlight2.value)
+            if (this.map.rooms[py][px].highlight != LHMap.settings.highlight2.value) {
                 this.map.highlight = LHMap.settings.highlight2.value;
-            else
+            } else
                 this.map.highlight = false;
         } else
             this.map.highlight = false;
