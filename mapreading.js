@@ -309,7 +309,6 @@ class Settings {
                 row.addEventListener('click', function(e) { document.querySelector(`#settings-modal input[data-key=${this.dataset.key}]`).click() });
 
                 btn.dataset.key = option.key;
-                //btn.innerText = option.value;
                 switch (option.type) {
                     case "key":
                         //modal listening to key press, [escape] disabling keybind until new key press
