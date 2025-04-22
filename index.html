@@ -63,6 +63,9 @@
                 <button type="button" onclick="copyTextToClipboard(window.location.origin + window.location.pathname + '?map=' + lhmap.rooms.convert())" class="img-btn" title="Share Map">
                     <img src="images/share.png" alt="Share" />
                 </button>
+                <button type="button" onclick="lhmap.toggleHighlightMBD(); lhmap.paint()" class="img-btn" title="Toggle Highlight MBD">
+                    <img src="images/defender.png" alt="H" id="highlight-mbd" />
+                </button>
                 <button type="button" data-for="#settings-modal" class="open-modal img-btn" title="Options">
                     <img src="images/settings.png" alt="O" data-for="#settings-modal"/>
                 </button>

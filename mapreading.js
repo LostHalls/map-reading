@@ -498,6 +498,13 @@ class LHMap {
         //this.forceRatio(true);
     }
 
+    toggleHighlightMBD() {
+        this.highlightMBD = !this.highlightMBD;
+        /** @type {HTMLImageElement} */
+        const image = document.getElementById("highlight-mbd");
+        image.src = this.highlightMBD ? "images/defender-hl.png" : "images/defender.png";
+        
+    }
     /*forceRatio() {
         if (!this.founddefender)
         {
@@ -545,6 +552,28 @@ class LHMap {
             if (this.start.y <= 3 - !!shifty || this.start.y > 4) {
                 ctx.fillRect(shifty, shiftx, 100, 900 - 2 * shiftx);
                 ctx.fillRect(800 - shifty, shiftx, 100, 900 - 2 * shiftx);
+            }
+        }
+        if (this.highlightMBD) {
+            for (var x = 8; x >= 0; x--) {
+                for (var y = 8; y >= 0; y--) {
+                    if (this.rooms[x][y].isDefender && this.rooms[x][y].isSeen) {
+                        let pos = { x, y };
+                        if (this.rooms[x][y].left) pos.y++;
+                        if (this.rooms[x][y].up) pos.x++;
+                        if (this.rooms[x][y].right) pos.y--;
+                        if (this.rooms[x][y].down) pos.x--;
+    
+                        // pos is now top left corner of the defender
+                        pos.x--;
+                        pos.y--;
+    
+                        ctx.strokeStyle = "#ffd900";
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(100 * pos.y + shifty,  100 * pos.x + shiftx, 298, 298);
+                        break;
+                    }
+                }
             }
         }
 
@@ -898,7 +927,7 @@ class LHMap {
         this.globalpots = document.createElement('div');
         this.globaldefenders = document.createElement('div');
         this.globalratio = document.createElement('div');
-
+        this.highlightMBD = false;
         LHMap.settings.onchange(this);
 
         this.setup(map);
