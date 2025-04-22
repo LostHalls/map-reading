@@ -557,7 +557,7 @@ class LHMap {
         if (this.highlightMBD) {
             for (var x = 8; x >= 0; x--) {
                 for (var y = 8; y >= 0; y--) {
-                    if (this.rooms[x][y].isDefender && this.rooms[x][y].isSeen) {
+                    if (this.rooms[x][y].isDefender && (this.rooms[x][y].isSeen || this.showallrooms)) {
                         let pos = { x, y };
                         if (this.rooms[x][y].left) pos.y++;
                         if (this.rooms[x][y].up) pos.x++;
@@ -931,8 +931,6 @@ class LHMap {
         LHMap.settings.onchange(this);
 
         this.setup(map);
-
-        var _this = this;
 
         document.addEventListener('keydown', { handleEvent: this.keyboard_listener, map: this });
         this.canvas.addEventListener('mousemove', { handleEvent: this.mousemove_listener, map: this });
