@@ -370,7 +370,8 @@ class LHMap {
     keyboard_listener(e) {
         if (document.querySelector("#settings-modal").style.display == "block")
             return;
-        switch (e.key) {
+        var keypress = (e.keyCode >= 65 && e.keyCode <= 90) ? String.fromCharCode(e.keyCode + 32) : e.key
+        switch (keypress) {
             case LHMap.settings.up1.value:
             case LHMap.settings.up2.value:
                 this.map.onUp();

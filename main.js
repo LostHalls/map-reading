@@ -103,12 +103,12 @@ var callback = function() {
             if (e.key == "Escape")
                 LHMap.settings[keymodal.dataset.key].value = "None";
             else {
-                LHMap.settings[keymodal.dataset.key].value = e.key;
+                LHMap.settings[keymodal.dataset.key].value = e.key.toLowerCase();
 
                 var values = Object.values(LHMap.settings);
                 for (var obj in values) {
                     if (values[obj] != LHMap.settings[keymodal.dataset.key] &&
-                        values[obj].value == e.key)
+                        values[obj].value == e.key.toLowerCase())
                         values[obj].value = "None";
                 }
             }
