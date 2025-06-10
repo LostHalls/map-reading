@@ -27,7 +27,7 @@ New features once beta is completed include:
 HTML/JavaScript fork of the Java Map Reading Practice program, with some changes.
 
 ## Link to Website
-https://husky-rotmg.github.io/MapReadingPractice-Web/
+https://maps.pubhalls.com/
 
 ## How to Use
 By default, you can use WASD and/or arrow keys to move around. 
