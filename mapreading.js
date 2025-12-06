@@ -567,6 +567,27 @@ class LHMap {
             }
         }
 
+        if (this.showborders) {
+            const cutoffx = Math.floor((Math.max(this.cutoffs.left, this.cutoffs.right) - Math.min(this.cutoffs.left, this.cutoffs.right)) / 2);
+            const cutoffy = Math.floor((Math.max(this.cutoffs.top, this.cutoffs.bottom) - Math.min(this.cutoffs.top, this.cutoffs.bottom)) / 2);
+            for (var x = 8; x >= 0; x--) {
+                for (var y = 8; y >= 0; y--) {
+                        if (
+                            y < cutoffx
+                            || (!shifty && y > 8 - cutoffx)
+                            || (shifty && y >= 8 - cutoffx)
+                            || x < cutoffy
+                            || (!shiftx && x > 8 - cutoffy)
+                            || (shiftx && x >= 8 - cutoffy)
+                        ) {
+                            ctx.fillStyle = LHMap.settings.bordercol.value;
+                            ctx.fillRect(100 * y + shifty, 100 * x + shiftx, 100, 100);
+                            continue;
+                        }
+                }
+            }
+        }
+
         for (var x = 8; x >= 0; x--) {
             for (var y = 8; y >= 0; y--) {
                 if (this.rooms[x][y].highlight) {
@@ -581,25 +602,8 @@ class LHMap {
 
         const extend = 30;
 
-        const cutoffx = Math.floor((Math.max(this.cutoffs.left, this.cutoffs.right) - Math.min(this.cutoffs.left, this.cutoffs.right)) / 2);
-        const cutoffy = Math.floor((Math.max(this.cutoffs.top, this.cutoffs.bottom) - Math.min(this.cutoffs.top, this.cutoffs.bottom)) / 2);
-
         for (var x = 8; x >= 0; x--) {
             for (var y = 8; y >= 0; y--) {
-                if (this.showborders) {
-                    if (
-                        y < cutoffx
-                        || (!shifty && y > 8 - cutoffx)
-                        || (shifty && y >= 8 - cutoffx)
-                        || x < cutoffy
-                        || (!shiftx && x > 8 - cutoffy)
-                        || (shiftx && x >= 8 - cutoffy)
-                    ) {
-                        ctx.fillStyle = LHMap.settings.bordercol.value;
-                        ctx.fillRect(100 * y + shifty, 100 * x + shiftx, 100, 100);
-                        continue;
-                    }
-                }
                 if (this.rooms[x][y].isSeen ||
                     (this.showallrooms && !this.rooms[x][y].isBorder && (this.rooms[x][y].up || this.rooms[x][y].down || this.rooms[x][y].left || this.rooms[x][y].right))) {
                     ctx.fillStyle = "hsl(0, 0%, 20%)";
