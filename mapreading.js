@@ -581,8 +581,8 @@ class LHMap {
 
         const extend = 30;
 
-        const cutoffx = Math.floor((this.cutoffs.left + this.cutoffs.right) / 2)
-        const cutoffy = Math.floor((this.cutoffs.top  + this.cutoffs.bottom) / 2)
+        const cutoffx = Math.floor((Math.max(this.cutoffs.left, this.cutoffs.right) - Math.min(this.cutoffs.left, this.cutoffs.right)) / 2);
+        const cutoffy = Math.floor((Math.max(this.cutoffs.top, this.cutoffs.bottom) - Math.min(this.cutoffs.top, this.cutoffs.bottom)) / 2);
 
         for (var x = 8; x >= 0; x--) {
             for (var y = 8; y >= 0; y--) {
