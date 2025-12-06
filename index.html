@@ -39,7 +39,8 @@
                 </div><br>
                 <div id="gratio">
                     <div>Pot Ratio:</div>
-                </div>
+                </div><br>
+                <div id="fail-info"></div>
             </div>
             <div id="buttons">
                 <button type="button" onclick="lhmap.setup()" class="img-btn" title="New Map">
@@ -69,6 +70,28 @@
                 <button type="button" data-for="#settings-modal" class="open-modal img-btn" title="Options">
                     <img src="images/settings.png" alt="O" data-for="#settings-modal"/>
                 </button>
+                <div class="filters">
+                    <label for="number-pots">Pots</label><br>
+                    <select id="number-pots" name = "number-pots">
+                        <option value="all" selected>Any</option>
+                        <option value="5">5</option>
+                        <option value="4">4</option>
+                        <option value="3">3</option>
+                        <option value="2">2</option>
+                    </select>
+                </div>
+                <div class="filters">
+                    <label for="cutoffs">Cutoffs</label><br>
+                    <select id="cutoffs" name="cutoffs" >
+                        <option value="all" selected>Any</option>
+                        <option value="none">Centered</option>
+                        <option value="1">Half Shift</option>
+                        <option value="2">Full Shift</option>
+                        <option value="3">1½ Shift</option>
+                        <option value="4">Double Cutoff</option>
+                        <option value="hidden">Hidden Cutoff</option>
+                    </select>
+                </div>
             </div>
             <div class="d-pad" draggable="true">
                 <a class="up arrow" onclick="lhmap.onUp(); lhmap.paint()"></a>

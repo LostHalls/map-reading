@@ -102,7 +102,9 @@ main {}
 #display>div>div>div:last-child {
     float: right;
 }
-
+.filter-miss, #fail-info {
+    color: red;
+}
 @media (orientation: portrait) {
     #display {
         height: 260px;
@@ -115,7 +117,7 @@ main {}
         justify-content: space-between;
         padding: 0;
         min-width: 448px;
-        min-height: 240px;
+        min-height: 286px;
     }
     #display>div {
         margin: 4px;
@@ -299,7 +301,7 @@ input[type="button"]:active,
     box-shadow: 1px 1px 2px 2px black;
 }
 
-.img-btn {
+.img-btn, .filters {
     padding: 2px;
     width: 62px;
     height: 62px;
@@ -308,6 +310,17 @@ input[type="button"]:active,
     background-color: hsl(0, 0%, 30%);
     outline: none;
     margin: 4px;
+}
+
+.filters {
+    width: 56px;
+    height: 56px;
+    font-size: .8em;
+    text-align: center;
+}
+
+.filters select {
+    width: 52px;
 }
 
 .img-btn img {

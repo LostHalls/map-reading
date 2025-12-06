@@ -661,7 +661,6 @@ class LHMap {
                     ctx.arc(100 * this.troom.y + (50 + shifty), 100 * this.troom.x + (50 + shiftx), 8, 0, 2 * Math.PI);
                     ctx.fill();
                 }
-
             }
         }
         if (this.showborders) {
@@ -943,14 +942,55 @@ class LHMap {
             return false;
         });
     }
+
+    getDefenderRooms() {
+        const { x, y, down, up, left, right } = this.defender;
+        const center = this.rooms[x - down + up][y - right + left];
+        return [
+            center,
+            this.rooms[center.x - 1][center.y - 1],
+            this.rooms[center.x - 1][center.y + 1],
+            this.rooms[center.x + 1][center.y - 1],
+            this.rooms[center.x + 1][center.y + 1],
+            this.rooms[center.x][center.y - 1],
+            this.rooms[center.x][center.y + 1],
+            this.rooms[center.x - 1][center.y],
+            this.rooms[center.x + 1][center.y]
+        ];
+    }
+
     setup(map) {
+        let attempts = 0;
+        do {
+            attempts++;
+            this.build(map);
+
+            if (this.troom_timeout) {
+                clearTimeout(this.troom_timeout);
+            }
+        } while (!map && attempts < 15000 && !this.confirmFilters());
+        if (attempts == 15000) {
+            document.querySelector('#buttons').classList.add('filter-miss');
+            document.querySelector('#fail-info').innerText = 'Filters failed after 15,000 attempts';
+        } else {
+            document.querySelector('#buttons').classList.remove('filter-miss');
+            document.querySelector('#fail-info').innerText = '';
+        }
+        console.log(`Generated map after ${attempts} attempt(s)`);
+        this.paint();
+        this.loopTrooms();
+        return attempts;
+    }
+
+    build(map) {
         if (this.rooms) {
             this.savemap();
         }
         if (map) {
             this.rooms = map.revert();
-        } else
+        } else {
             [this.rooms, this.main] = this.generate();
+        }
         this.pots = [];
         this.borders = [];
         this.start = this.rooms[4][4];
@@ -977,17 +1017,121 @@ class LHMap {
             }
         }
 
+        this.mbcRooms = this.getDefenderRooms();
+
+        this.bottomBorder = this.rooms[8][2].isBorder;
+        this.rightBorder = this.rooms[2][8].isBorder;
+
         this.hinttroom = this.pots.length != 5;
 
         this.start.isSeen = true;
         this.current = this.start;
         this.troom_showing = false;
-        if (this.troom_timeout) {
-            clearTimeout(this.troom_timeout);
-        }
-        this.paint();
-        this.loopTrooms();
     }
+
+    checkRoomMatters(room) {
+        if (room.isBorder) return false;
+        if (room.up || room.down || room.left || room.right) return true;
+        return this.mbcRooms.includes(room);
+    }
+
+    cutoffLength() {
+        let left = 0, right = 0, top = 0, bottom = 0;
+        const { start } = this;
+        for (let x = start.x - 1; x >= 0; x--) {
+            let empty = true;
+            for (let y = 0; y < 9; y++) {
+                if (this.checkRoomMatters(this.rooms[x][y])) {
+                    empty = false;
+                    break;
+                }
+            }
+            if (empty) break;
+            top++;
+        }
+
+        for (let x = start.x + 1; x < 9; x++) {
+            let empty = true;
+            for (let y = 0; y < 9; y++) {
+                if (this.checkRoomMatters(this.rooms[x][y])) {
+                    empty = false;
+                    break;
+                }
+            }
+            if (empty) break;
+            bottom++;
+        }
+
+        for (let x = start.y - 1; x >= 0; x--) {
+            let empty = true;
+            for (let y = 0; y < 9; y++) {
+                if (this.checkRoomMatters(this.rooms[y][x])) {
+                    empty = false;
+                    break;
+                }
+            }
+            if (empty) break;
+            left++;
+        }
+
+        for (let x = start.y + 1; x < 9; x++) {
+            let empty = true;
+            for (let y = 0; y < 9; y++) {
+                if (this.checkRoomMatters(this.rooms[y][x])) {
+                    empty = false;
+                    break;
+                }
+            }
+            if (empty) break;
+            right++;
+        }
+
+        return [ 4 - left, 4 - right, 4 - top, 4 - bottom ];
+    }
+
+    confirmFilters() {
+        /** @type {HTMLSelectElement} */
+        const numberPots = document.querySelector('#number-pots');
+        /** @type {HTMLSelectElement} */
+        const cutoffs = document.querySelector('#cutoffs')
+        let matchedPots = false;
+        for (const option of numberPots.options) {
+            if (!option.selected) continue;
+            if (option.value == 'all' || this.pots.length == parseInt(option.value)) {
+                matchedPots = true;
+                break;
+            }
+        }
+        if (!matchedPots) {
+            // console.log(`POTS (${this.pots.length})`);
+            return false;
+        }
+
+        let matchedCutoffLength = false
+        const cutoff = this.cutoffLength();
+        const length = Math.max(...cutoff);
+        for (const option of cutoffs.options) {
+            if (!option.selected) continue;
+            if (option.value == 'hidden' && ((cutoff[0] && cutoff[1]) || (cutoff[2] && cutoff[3]))) {
+                matchedCutoffLength = true;
+                break;
+            }
+            if (option.value == 'none' && length == 0) {
+                matchedCutoffLength = true;
+                break;
+            }
+            if (option.value == 'all' || length == parseInt(option.value)) {
+                matchedCutoffLength = true;
+                break;
+            }
+        }
+        if (!matchedCutoffLength) {
+            // console.log(`CUTOFFS (${length})`);
+            return false;
+        }
+        return true;
+    }
+
     loopTrooms() {
         return new Promise(async(resolve) => {
             for (let i = this.pots.length; i < 5; i++) {

@@ -52,12 +52,13 @@ function copyTextToClipboard(text) {
 
 var lhmap, map = false;
 
-try {
-    map = new URLSearchParams(window.location.search).get("map");
-} catch (e) {}
-lhmap = new LHMap(map);
 
 var callback = function() {
+    try {
+        map = new URLSearchParams(window.location.search).get("map");
+    } catch (e) {}
+    lhmap = new LHMap(map);
+
     $('html, body').scrollTop($(document).height());
 
     var dp = document.getElementsByClassName("d-pad")[0];
