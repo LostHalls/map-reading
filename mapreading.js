@@ -243,7 +243,7 @@ class Settings {
     }
 
     offchange(callback) {
-        Settings.__change_events = Settings.__change_events.filter(evt => evt == callback);
+        Settings.__change_events = Settings.__change_events.filter(evt => evt != callback);
     }
 
     defaults() {

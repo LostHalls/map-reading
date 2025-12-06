@@ -54,6 +54,12 @@ var lhmap, map = false;
 
 
 var callback = function() {
+    document.querySelector('#highlight-1-btn').value = LHMap.settings.highlight1.value;
+    document.querySelector('.colorpicker:has(#highlight-1-btn)').style.backgroundColor = LHMap.settings.highlight1.value;
+    document.querySelector('#highlight-2-btn').value = LHMap.settings.highlight2.value;
+    document.querySelector('.colorpicker:has(#highlight-2-btn)').style.backgroundColor = LHMap.settings.highlight2.value;
+    document.querySelector('#highlight-3-btn').value = LHMap.settings.highlight3.value;
+    document.querySelector('.colorpicker:has(#highlight-3-btn)').style.backgroundColor = LHMap.settings.highlight3.value;
     try {
         map = new URLSearchParams(window.location.search).get("map");
     } catch (e) {}

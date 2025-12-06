@@ -70,6 +70,24 @@
                 <button type="button" data-for="#settings-modal" class="open-modal img-btn" title="Options">
                     <img src="images/settings.png" alt="O" data-for="#settings-modal"/>
                 </button>
+                <div class="highlights">
+                    <label for="highlight-1-btn">🖱️ L</label>
+                    <div class="colorpicker">
+                        <input type="color" id="highlight-1-btn" oninput="LHMap.settings.highlight1.value=this.value;LHMap.settings.save();this.parentElement.style.backgroundColor = this.value">
+                    </div>
+                </div>
+                <div class="highlights">
+                    <label for="highlight-2-btn">🖱️ R</label>
+                    <div class="colorpicker">
+                        <input type="color" id="highlight-2-btn" oninput="LHMap.settings.highlight2.value=this.value;LHMap.settings.save();this.parentElement.style.backgroundColor = this.value">
+                    </div>
+                </div>
+                <div class="highlights">
+                    <label for="highlight-3-btn">⇧ + 🖱️ L</label>
+                    <div class="colorpicker">
+                        <input type="color" id="highlight-3-btn" oninput="LHMap.settings.highlight3.value=this.value;LHMap.settings.save();this.parentElement.style.backgroundColor = this.value">
+                    </div>
+                </div>
                 <div class="filters">
                     <label for="number-pots">Pots</label><br>
                     <select id="number-pots" name = "number-pots">

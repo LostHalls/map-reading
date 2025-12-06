@@ -47,19 +47,6 @@ body {}
     min-height: 448px;
 }
 
-#display input {
-    margin-left: 50px;
-    margin-top: 20px;
-    max-height: min(52px, calc((100vh - 350px)/3));
-}
-
-@media only screen and (orientation: landscape) and (max-width: 400px) {
-    #display input {
-        padding-top: 0;
-        padding-bottom: 0;
-    }
-}
-
 main>* {
     float: left;
 }
@@ -102,7 +89,7 @@ main {}
 #display>div>div>div:last-child {
     float: right;
 }
-.filter-miss, #fail-info {
+.filter-miss .filters, #fail-info {
     color: red;
 }
 @media (orientation: portrait) {
@@ -301,7 +288,7 @@ input[type="button"]:active,
     box-shadow: 1px 1px 2px 2px black;
 }
 
-.img-btn, .filters {
+.img-btn, .filters, .highlights {
     padding: 2px;
     width: 62px;
     height: 62px;
@@ -312,17 +299,34 @@ input[type="button"]:active,
     margin: 4px;
 }
 
-.filters {
+.filters, .highlights {
     width: 56px;
     height: 56px;
-    font-size: .8em;
+    font-size: .7em;
     text-align: center;
 }
 
 .filters select {
     width: 52px;
 }
+.colorpicker {
+    width: 100%;
+    height: 36px;
+    padding: 0;
+    margin: 0 auto;
+    border: none;
+    position: relative;
+    border-radius: 8%;
+}
 
+.colorpicker input[type="color"] {
+    opacity: 0;
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+}
 .img-btn img {
     width: 56px;
     border-radius: 8%;
