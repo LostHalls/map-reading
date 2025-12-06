@@ -544,17 +544,6 @@ class LHMap {
         var shiftx = this.rooms[8][0].isBorder ? 50 : 0;
         var shifty = this.rooms[0][8].isBorder ? 50 : 0;
 
-        if (this.showborders) {
-            ctx.fillStyle = LHMap.settings.bordercol.value;
-            if (this.start.x <= 3 - !!shiftx || this.start.x > 4) {
-                ctx.fillRect(shifty, shiftx, 900 - 2 * shifty, 100);
-                ctx.fillRect(shifty, 800 - shiftx, 900 - 2 * shifty, 100);
-            }
-            if (this.start.y <= 3 - !!shifty || this.start.y > 4) {
-                ctx.fillRect(shifty, shiftx, 100, 900 - 2 * shiftx);
-                ctx.fillRect(800 - shifty, shiftx, 100, 900 - 2 * shiftx);
-            }
-        }
         if (this.highlightMBD) {
             for (var x = 8; x >= 0; x--) {
                 for (var y = 8; y >= 0; y--) {
@@ -590,10 +579,27 @@ class LHMap {
 
         this.drawSplits(ctx, this.start.x, this.start.y, shiftx, shifty);
 
-        var extend = 30;
+        const extend = 30;
+
+        const cutoffx = Math.floor((this.cutoffs.left + this.cutoffs.right) / 2)
+        const cutoffy = Math.floor((this.cutoffs.top  + this.cutoffs.bottom) / 2)
 
         for (var x = 8; x >= 0; x--) {
             for (var y = 8; y >= 0; y--) {
+                if (this.showborders) {
+                    if (
+                        y < cutoffx
+                        || (!shifty && y > 8 - cutoffx)
+                        || (shifty && y >= 8 - cutoffx)
+                        || x < cutoffy
+                        || (!shiftx && x > 8 - cutoffy)
+                        || (shiftx && x >= 8 - cutoffy)
+                    ) {
+                        ctx.fillStyle = LHMap.settings.bordercol.value;
+                        ctx.fillRect(100 * y + shifty, 100 * x + shiftx, 100, 100);
+                        continue;
+                    }
+                }
                 if (this.rooms[x][y].isSeen ||
                     (this.showallrooms && !this.rooms[x][y].isBorder && (this.rooms[x][y].up || this.rooms[x][y].down || this.rooms[x][y].left || this.rooms[x][y].right))) {
                     ctx.fillStyle = "hsl(0, 0%, 20%)";
@@ -603,36 +609,27 @@ class LHMap {
 
                     if (this.rooms[x][y].up) {
                         ctx.fillStyle = "hsl(0, 0%, 20%)";
-
-                        var dist = extend;
-
-                        ctx.fillRect(100 * y + (33 + shifty), 100 * x + shiftx + (15 - dist), 34, dist);
+                        ctx.fillRect(100 * y + (33 + shifty), 100 * x + shiftx + (15 - extend), 34, extend);
                         ctx.fillStyle = "#404040";
-                        ctx.fillRect(100 * y + (38 + shifty), 100 * x + shiftx + (15 - dist), 24, dist + 5);
+                        ctx.fillRect(100 * y + (38 + shifty), 100 * x + shiftx + (15 - extend), 24, extend + 5);
                     }
                     if (this.rooms[x][y].down) {
                         ctx.fillStyle = "hsl(0, 0%, 20%)";
-                        var dist = extend;
-
-                        ctx.fillRect(100 * y + (33 + shifty), 100 * x + (85 + shiftx), 34, dist);
+                        ctx.fillRect(100 * y + (33 + shifty), 100 * x + (85 + shiftx), 34, extend);
                         ctx.fillStyle = "#404040";
-                        ctx.fillRect(100 * y + (38 + shifty), 100 * x + (80 + shiftx), 24, dist + 5);
-
+                        ctx.fillRect(100 * y + (38 + shifty), 100 * x + (80 + shiftx), 24, extend + 5);
                     }
                     if (this.rooms[x][y].left) {
                         ctx.fillStyle = "hsl(0, 0%, 20%)";
-                        var dist = extend;
-
-                        ctx.fillRect(100 * y + shifty + (15 - dist), 100 * x + (33 + shiftx), dist, 34);
+                        ctx.fillRect(100 * y + shifty + (15 - extend), 100 * x + (33 + shiftx), extend, 34);
                         ctx.fillStyle = "#404040";
-                        ctx.fillRect(100 * y + shifty + (15 - dist), 100 * x + (38 + shiftx), dist + 5, 24);
+                        ctx.fillRect(100 * y + shifty + (15 - extend), 100 * x + (38 + shiftx), extend + 5, 24);
                     }
                     if (this.rooms[x][y].right) {
                         ctx.fillStyle = "hsl(0, 0%, 20%)";
-                        dist = extend;
-                        ctx.fillRect(100 * y + (85 + shifty), 100 * x + (33 + shiftx), dist, 34);
+                        ctx.fillRect(100 * y + (85 + shifty), 100 * x + (33 + shiftx), extend, 34);
                         ctx.fillStyle = "#404040";
-                        ctx.fillRect(100 * y + (80 + shifty), 100 * x + (38 + shiftx), dist + 5, 24);
+                        ctx.fillRect(100 * y + (80 + shifty), 100 * x + (38 + shiftx), extend + 5, 24);
                     }
                     var img = false;
                     if (this.rooms[x][y].isDefender) {
@@ -981,7 +978,50 @@ class LHMap {
         this.loopTrooms();
         return attempts;
     }
-
+    /** @type {Room[][]} */
+    rooms;
+    /** @type {Room[]} */
+    pots;
+    /** @type {Room[]} */
+    borders;
+    /** @type {Room} */
+    start;
+    /** @type {boolean} */
+    showpots;
+    /** @type {boolean} */
+    showborders;
+    /** @type {boolean} */
+    shotcutoffs;
+    /** @type {boolean} */
+    showallrooms;
+    /** @type {Room[]} */
+    history;
+    /** @type {Room[]} */
+    foundpots;
+    /** @type {boolean} */
+    founddefender;
+    /** @type {Room} */
+    defender;
+    /** @type {Room} */
+    troom;
+    /** @type {Room[]} */
+    mbcRooms;
+    /** @type {boolean} */
+    bottomBorder;
+    /** @type {boolean} */
+    rightBorder;
+    /** @type {ReturnType<LHMap['calculateCutoffs']>} */
+    cutoffs;
+    /** @type {Room[]} */
+    main;
+    /** @type {boolean} */
+    hinttroom;
+    /** @type {Room} */
+    current;
+    /** @type {boolean} */
+    troom_showing;
+    /** @type {ReturnType<LHMap['findLoop']> | undefined} */
+    loop;
     build(map) {
         if (this.rooms) {
             this.savemap();
@@ -989,7 +1029,7 @@ class LHMap {
         if (map) {
             this.rooms = map.revert();
         } else {
-            [this.rooms, this.main] = this.generate();
+            this.rooms= this.generate();
         }
         this.pots = [];
         this.borders = [];
@@ -1022,11 +1062,60 @@ class LHMap {
         this.bottomBorder = this.rooms[8][2].isBorder;
         this.rightBorder = this.rooms[2][8].isBorder;
 
+        this.cutoffs = this.calculateCutoffs();
+        this.main = this.getMainPath();
+        this.loop = this.findLoop();
         this.hinttroom = this.pots.length != 5;
 
         this.start.isSeen = true;
         this.current = this.start;
         this.troom_showing = false;
+    }
+
+    getMainPath() {
+        const allPaths = this.calculateMainPath();
+        const defenderPaths = allPaths.filter(p => p.includes(this.defender))
+        return defenderPaths.reduce((a, b) => a.length < b.length ? a : b, defenderPaths[0]);
+    }
+
+    findLoop() {
+        for (const row of this.rooms) {
+            for (const topLeft of row) {
+                if (topLeft.right && topLeft.down && !topLeft.isBorder) {
+                    const bottomLeft = this.rooms[topLeft.x + 1][topLeft.y];
+                    const topRight = this.rooms[topLeft.x][topLeft.y + 1];
+                    const bottomRight = this.rooms[topLeft.x + 1][topLeft.y + 1];
+                    if (bottomLeft.right && topRight.down) {
+                        return { topLeft, topRight, bottomLeft, bottomRight };
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * 
+     * @param {Room} room 
+     * @param {Set<Room>} searched 
+     * @returns {Room[][]}
+     */
+    calculateMainPath(room = this.start, searched = new Set()) {
+        if (room.isDefender || room.isPot || room.isTRoom) return [[room]];
+        const paths = [];
+        const directions = ['up', 'down', 'left', 'right'];
+        if (searched.has(room)) return [];
+        searched.add(room);
+        for (const dir of directions) {
+            if (room[dir]) {
+                const x = room.x + (dir == 'down' ? 1 : dir == 'up' ? -1 : 0);
+                const y = room.y + (dir == 'right' ? 1 : dir == 'left' ? -1 : 0);
+                const next = this.rooms[x][y];
+                const laters = this.calculateMainPath(next, new Set(searched));
+                for (const list of laters) list.unshift(room);
+                paths.push(...laters);
+            }
+        }
+        return paths;
     }
 
     checkRoomMatters(room) {
@@ -1035,7 +1124,7 @@ class LHMap {
         return this.mbcRooms.includes(room);
     }
 
-    cutoffLength() {
+    calculateCutoffs() {
         let left = 0, right = 0, top = 0, bottom = 0;
         const { start } = this;
         for (let x = start.x - 1; x >= 0; x--) {
@@ -1086,50 +1175,47 @@ class LHMap {
             right++;
         }
 
-        return [ 4 - left, 4 - right, 4 - top, 4 - bottom ];
+        return {
+            left: 4 - left, 
+            right: 4 - right, 
+            top: 4 - top, 
+            bottom: 4 - bottom 
+        };
+    }
+
+    confirmNumberPots() {
+        const numberPotsSelect = document.querySelector('#number-pots');
+        const option = numberPotsSelect.selectedOptions[0].value;
+        return option == 'all'
+            || this.pots.length == parseInt(option);
+    }
+
+    confirmLoops() {
+        const loopSelect = document.querySelector('#loops');
+        const lo = loopSelect.selectedOptions[0].value;
+        return lo == 'all'
+            || (lo == 'none' && !this.loop)
+            || (lo == 'loop' && this.loop)
+            || (lo == '1' && this.loop && this.main.length == 11)
+            || (lo == '2' && this.loop && this.main.length == 12)
+            || (lo == '3' && this.loop && this.main.length == 13);
+    }
+
+    confirmCutoffLength() {
+        const cutoffSelect = document.querySelector('#cutoffs');
+        const option = cutoffSelect.selectedOptions[0].value;
+        const length = Math.max(...Object.values(this.cutoffs));
+        return option == 'all'
+            || (option == 'hidden' && ((this.cutoffs.left && this.cutoffs.right) || (this.cutoffs.top && this.cutoffs.bottom)))
+            || length == parseInt(option);
     }
 
     confirmFilters() {
-        /** @type {HTMLSelectElement} */
-        const numberPots = document.querySelector('#number-pots');
-        /** @type {HTMLSelectElement} */
-        const cutoffs = document.querySelector('#cutoffs')
-        let matchedPots = false;
-        for (const option of numberPots.options) {
-            if (!option.selected) continue;
-            if (option.value == 'all' || this.pots.length == parseInt(option.value)) {
-                matchedPots = true;
-                break;
-            }
-        }
-        if (!matchedPots) {
-            // console.log(`POTS (${this.pots.length})`);
-            return false;
-        }
-
-        let matchedCutoffLength = false
-        const cutoff = this.cutoffLength();
-        const length = Math.max(...cutoff);
-        for (const option of cutoffs.options) {
-            if (!option.selected) continue;
-            if (option.value == 'hidden' && ((cutoff[0] && cutoff[1]) || (cutoff[2] && cutoff[3]))) {
-                matchedCutoffLength = true;
-                break;
-            }
-            if (option.value == 'none' && length == 0) {
-                matchedCutoffLength = true;
-                break;
-            }
-            if (option.value == 'all' || length == parseInt(option.value)) {
-                matchedCutoffLength = true;
-                break;
-            }
-        }
-        if (!matchedCutoffLength) {
-            // console.log(`CUTOFFS (${length})`);
-            return false;
-        }
-        return true;
+        const cnp = this.confirmNumberPots();
+        const ccl = this.confirmCutoffLength();
+        const cl = this.confirmLoops();
+        console.log(`Filters: Number of Pots: ${cnp}, Cutoff Length: ${ccl}, Loops: ${cl}`);
+        return  cnp && ccl && cl;
     }
 
     loopTrooms() {
@@ -1238,7 +1324,7 @@ class LHMap {
             }
         }
 
-        return [rooms, mainpath];
+        return rooms;
 
         function create9x9() {
             var map = [];
