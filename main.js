@@ -45,6 +45,9 @@ function copyTextToClipboard(text) {
     }
     navigator.clipboard.writeText(text).then(function() {
         console.log('Async: Copying to clipboard was successful!');
+        var toast = document.getElementById('toast');
+        toast.className = "show"
+        setTimeout(function() {toast.className = toast.className.replace("show", ""); }, 3000);
     }, function(err) {
         console.error('Async: Could not copy text: ', err);
     });
